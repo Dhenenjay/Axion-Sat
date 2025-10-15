@@ -204,16 +204,14 @@ def apply_lora_to_cross_attention(
         
         def make_lora_forward(orig_forward, lora):
             def lora_forward(x):
-                # Base output (frozen) - detach to avoid gradient issues
-                base_out = orig_forward(x).detach()
-                # Create a version of x with gradients enabled for LoRA
-                if not x.requires_grad:
-                    x_with_grad = x.detach().clone().requires_grad_(True)
-                else:
-                    x_with_grad = x
-                # LoRA output (trainable) - this preserves gradients
-                lora_out = lora(x_with_grad)
-                # Sum: gradient flows only through LoRA path
+                # Base output (frozen) - always detach since base is frozen
+                base_out = orig_forward(x)
+                if base_out.requires_grad:
+                    base_out = base_out.detach()
+                # LoRA output (trainable) - ensure this creates a gradient graph
+                # The LoRA parameters have requires_grad=True, so the matmul will create gradients
+                lora_out = lora(x)
+                # Sum: gradient only flows through LoRA, not base
                 return base_out + lora_out
             return lora_forward
         
@@ -627,11 +625,6 @@ def train_epoch(
         opt_v2 = batch['opt_v2'].to(device)
         s2_truth = batch['s2_truth'].to(device)
         valid_mask = batch['valid_mask'].to(device)
-        
-        # Enable gradients on inputs for LoRA training
-        # Even though only LoRA parameters are trainable, we need gradient flow through the computation
-        s1.requires_grad_(True)
-        opt_v2.requires_grad_(True)
         
         # Forward pass with AMP
         with autocast():
