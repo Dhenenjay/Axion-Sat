@@ -390,7 +390,7 @@ class Stage2ModelWithMetadata(nn.Module):
     Wraps PrithviRefiner with metadata conditioning.
     
     Architecture:
-        opt_v1 (12 ch) + metadata features (4 ch) → PrithviRefiner → refined (256 ch)
+        opt_v1 (12 ch) + metadata features (4 ch) → PrithviRefiner → refined features (256 ch) → output (4 ch)
     """
     
     def __init__(
@@ -412,6 +412,9 @@ class Stage2ModelWithMetadata(nn.Module):
         
         # Input projection: 16 channels (12 opt_v1 + 4 metadata) → 12 channels
         self.input_fusion = nn.Conv2d(16, 12, kernel_size=1)
+        
+        # Output projection: 256 features → 4 channels for loss computation
+        self.output_proj = nn.Conv2d(256, 4, kernel_size=1)
     
     def forward(
         self,
@@ -428,7 +431,7 @@ class Stage2ModelWithMetadata(nn.Module):
             biome: Biome indices (B,) or (B, 1)
             
         Returns:
-            Refined features (B, 256, H, W)
+            Refined optical output (B, 4, H, W)
         """
         B, C, H, W = opt_v1.shape
         
@@ -442,7 +445,10 @@ class Stage2ModelWithMetadata(nn.Module):
         fused_input = opt_v1  # (B, 12, H, W)
         
         # Pass through Prithvi refiner
-        refined = self.prithvi_refiner(fused_input)  # (B, 256, H, W)
+        refined_features = self.prithvi_refiner(fused_input)  # (B, 256, H, W)
+        
+        # Project to 4 channels for loss computation
+        refined = self.output_proj(refined_features)  # (B, 4, H, W)
         
         return refined
 
