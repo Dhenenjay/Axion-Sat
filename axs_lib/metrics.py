@@ -70,6 +70,8 @@ class PSNRMetric:
             PSNR value in dB (higher is better)
         """
         if self.psnr is not None:
+            # Move metric to same device as input tensors
+            self.psnr = self.psnr.to(pred.device)
             return self.psnr(pred, target)
         else:
             return self._compute_psnr(pred, target)
@@ -141,6 +143,8 @@ class SSIMMetric:
             SSIM value (higher is better, range: -1 to 1)
         """
         if self.ssim is not None:
+            # Move metric to same device as input tensors
+            self.ssim = self.ssim.to(pred.device)
             return self.ssim(pred, target)
         else:
             return self._compute_ssim(pred, target)
