@@ -204,11 +204,12 @@ class Stage3GroundingModel(nn.Module):
         
         # Prepare inputs for TerraMind
         # TerraMind expects a dict with modality keys
-        # S2L2A modality expects 6 channels, but we only have 4
-        # Pad with zeros for missing SWIR bands (B11, B12)
+        # S2L2A modality expects 12 Sentinel-2 bands, but we only have 4
+        # Pad with zeros for missing bands
         if opt_v2_std.shape[1] == 4:
-            # Pad to 6 channels: [B02, B03, B04, B08] → [B02, B03, B04, B08, 0, 0]
-            zeros = torch.zeros(opt_v2_std.shape[0], 2, opt_v2_std.shape[2], opt_v2_std.shape[3],
+            # Pad to 12 channels: [B02, B03, B04, B08] → [B02, B03, B04, B08, 0, 0, ..., 0]
+            # Missing bands: B05, B06, B07, B8A, B11, B12, B01, B09 (8 bands)
+            zeros = torch.zeros(opt_v2_std.shape[0], 8, opt_v2_std.shape[2], opt_v2_std.shape[3],
                                device=opt_v2_std.device, dtype=opt_v2_std.dtype)
             opt_v2_std = torch.cat([opt_v2_std, zeros], dim=1)
         
@@ -228,8 +229,8 @@ class Stage3GroundingModel(nn.Module):
         # Crop output back to original size
         output_std = output_std[:, :, :orig_h, :orig_w]
         
-        # TerraMind outputs 6 channels, crop to 4 (B02, B03, B04, B08)
-        if output_std.shape[1] == 6:
+        # TerraMind outputs 12 channels, crop to 4 (B02, B03, B04, B08)
+        if output_std.shape[1] == 12:
             output_std = output_std[:, :4, :, :]
         
         # Destandardize output
