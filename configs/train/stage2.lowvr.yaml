@@ -53,7 +53,7 @@ model:
     checkpoint: null
     
     # Input/output dimensions
-    in_channels: 4        # opt_v1: [B02, B03, B04, B08]
+    in_channels: 12       # opt_v1: 12 channels from Stage 1 TerraMind output
     out_channels: 256     # Feature dimension for ConvNeXt head
     
     # Image size (must match tile size)
@@ -325,7 +325,7 @@ loss:
   
   patchgan:
     # Number of input channels
-    in_channels: 4
+    in_channels: 12
     
     # Base number of filters
     base_filters: 32      # Small for low memory
