@@ -252,7 +252,7 @@ def build_stage3_model(
         input_modalities=('S1GRD', 'S2L2A'),  # Both SAR and optical as input
         output_modalities=('S2L2A',),  # Optical as output
         timesteps=timesteps,
-        standardize=standardize,
+        standardize=False,  # We handle standardization in our wrapper
         pretrained=pretrained
     )
     
