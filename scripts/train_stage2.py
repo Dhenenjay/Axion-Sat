@@ -390,7 +390,7 @@ class Stage2ModelWithMetadata(nn.Module):
     Wraps PrithviRefiner with metadata conditioning.
     
     Architecture:
-        opt_v1 (4 ch) + metadata features (4 ch) → PrithviRefiner → refined (4 ch)
+        opt_v1 (12 ch) + metadata features (4 ch) → PrithviRefiner → refined (256 ch)
     """
     
     def __init__(
@@ -410,8 +410,8 @@ class Stage2ModelWithMetadata(nn.Module):
             out_channels=4
         )
         
-        # Input projection: 8 channels (4 opt_v1 + 4 metadata) → 4 channels
-        self.input_fusion = nn.Conv2d(8, 4, kernel_size=1)
+        # Input projection: 16 channels (12 opt_v1 + 4 metadata) → 12 channels
+        self.input_fusion = nn.Conv2d(16, 12, kernel_size=1)
     
     def forward(
         self,
@@ -423,26 +423,26 @@ class Stage2ModelWithMetadata(nn.Module):
         Forward pass with metadata conditioning.
         
         Args:
-            opt_v1: Stage 1 output (B, 4, H, W)
+            opt_v1: Stage 1 output (B, 12, H, W)
             month: Month indices (B,) or (B, 1)
             biome: Biome indices (B,) or (B, 1)
             
         Returns:
-            Refined optical (B, 4, H, W)
+            Refined features (B, 256, H, W)
         """
         B, C, H, W = opt_v1.shape
         
         # TODO: Fix metadata embedding channel mismatch
         # Temporarily disabled metadata fusion to get training working
         # metadata_features = self.metadata_embed(month, biome, (H, W))  # (B, 4, H, W)
-        # fused_input = torch.cat([opt_v1, metadata_features], dim=1)  # (B, 8, H, W)
-        # fused_input = self.input_fusion(fused_input)  # (B, 4, H, W)
+        # fused_input = torch.cat([opt_v1, metadata_features], dim=1)  # (B, 16, H, W)
+        # fused_input = self.input_fusion(fused_input)  # (B, 12, H, W)
         
         # Use opt_v1 directly for now
-        fused_input = opt_v1  # (B, 4, H, W)
+        fused_input = opt_v1  # (B, 12, H, W)
         
         # Pass through Prithvi refiner
-        refined = self.prithvi_refiner(fused_input)  # (B, 4, H, W)
+        refined = self.prithvi_refiner(fused_input)  # (B, 256, H, W)
         
         return refined
 
