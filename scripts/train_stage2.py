@@ -952,26 +952,28 @@ def main():
             # Save best model
             if val_losses['loss'] < best_val_loss:
                 best_val_loss = val_losses['loss']
-                save_checkpoint(
-                    output_dir / 'best.pt',
-                    model=model,
-                    optimizer=optimizer,
-                    epoch=epoch,
-                    metrics={'val_loss': val_losses['loss']},
-                    config=config
-                )
+                state = {
+                    'model_state_dict': model.state_dict(),
+                    'optimizer_state_dict': optimizer.state_dict(),
+                    'epoch': epoch,
+                    'best_val_loss': best_val_loss,
+                    'metrics': {'val_loss': val_losses['loss']},
+                    'config': config
+                }
+                save_checkpoint(state, output_dir / 'best.pt')
                 print(f"✓ Saved best model (val_loss: {best_val_loss:.6f})")
         
         # Save checkpoint
         if (epoch + 1) % config['training']['checkpoint_interval'] == 0:
-            save_checkpoint(
-                output_dir / f'checkpoint_epoch_{epoch+1:03d}.pt',
-                model=model,
-                optimizer=optimizer,
-                epoch=epoch,
-                metrics={'train_loss': train_losses['loss']},
-                config=config
-            )
+            state = {
+                'model_state_dict': model.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'epoch': epoch,
+                'best_val_loss': best_val_loss,
+                'metrics': {'train_loss': train_losses['loss']},
+                'config': config
+            }
+            save_checkpoint(state, output_dir / f'checkpoint_epoch_{epoch+1:03d}.pt')
             print(f"✓ Saved checkpoint")
         
         # Log to file
