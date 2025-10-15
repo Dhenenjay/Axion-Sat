@@ -716,7 +716,7 @@ def build_prithvi_refiner(
             'lora_dropout': model_cfg.get('lora_dropout', 0.1),
             'lora_target_modules': model_cfg.get('lora_target_modules'),
             'freeze_backbone': model_cfg.get('freeze_base', True),
-            'load_in_8bit': True,  # Always use 8-bit for low VRAM
+            'load_in_8bit': model_cfg.get('use_8bit', False),  # Disable by default (H100 has plenty of VRAM)
         })
         
         # Prithvi-specific settings
