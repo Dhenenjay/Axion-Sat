@@ -214,10 +214,10 @@ stage2:
       checkpoint: weights/prithvi_100M.pt
       
       # Number of input bands (from Stage 1 output)
-      in_channels: 4  # Blue, Green, Red, NIR
+      in_channels: 12  # 12 channels from Stage 1 TerraMind output
       
       # Number of output classes (must match target channels for Stage 2)
-      num_classes: 4  # Blue, Green, Red, NIR output
+      num_classes: 256  # Dense features for Stage 3
       
       # Image size (must match tile_size)
       img_size: 96
