@@ -204,10 +204,11 @@ def apply_lora_to_cross_attention(
         
         def make_lora_forward(orig_forward, lora):
             def lora_forward(x):
-                # Base output (frozen)
-                base_out = orig_forward(x)
-                # LoRA output (trainable)
+                # Base output (frozen) - detach to avoid gradient issues
+                base_out = orig_forward(x).detach()
+                # LoRA output (trainable) - this preserves gradients
                 lora_out = lora(x)
+                # Sum: gradient flows only through LoRA path
                 return base_out + lora_out
             return lora_forward
         
@@ -627,6 +628,11 @@ def train_epoch(
             # Generate opt_v3
             opt_v3 = model(s1, opt_v2)
             
+            # Debug: check if output requires gradients
+            if i == 0:
+                print(f"\nDebug: opt_v3.requires_grad = {opt_v3.requires_grad}")
+                print(f"Debug: opt_v3.grad_fn = {opt_v3.grad_fn}")
+            
             # Compute loss
             losses = criterion(
                 opt_v3=opt_v3,
@@ -637,6 +643,11 @@ def train_epoch(
             )
             
             loss = losses['total'] / grad_accum_steps
+            
+            # Debug: check if loss requires gradients
+            if i == 0:
+                print(f"Debug: loss.requires_grad = {loss.requires_grad}")
+                print(f"Debug: loss.grad_fn = {loss.grad_fn}")
         
         # Backward pass with AMP
         scaler.scale(loss).backward()
