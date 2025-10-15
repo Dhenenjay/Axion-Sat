@@ -363,6 +363,22 @@ class Stage3Dataset(Dataset):
         if self.use_augmentation:
             s1, opt_v2, s2_truth, valid_mask = self._augment(s1, opt_v2, s2_truth, valid_mask)
         
+        # Pad to 128x128 for TerraMind (requires divisible by 16)
+        # Current tiles are 120x120, pad to 128x128
+        target_size = 128
+        if s1.shape[1] != target_size or s1.shape[2] != target_size:
+            pad_h = target_size - s1.shape[1]
+            pad_w = target_size - s1.shape[2]
+            pad_top = pad_h // 2
+            pad_bottom = pad_h - pad_top
+            pad_left = pad_w // 2
+            pad_right = pad_w - pad_left
+            
+            s1 = np.pad(s1, ((0, 0), (pad_top, pad_bottom), (pad_left, pad_right)), mode='reflect')
+            opt_v2 = np.pad(opt_v2, ((0, 0), (pad_top, pad_bottom), (pad_left, pad_right)), mode='reflect')
+            s2_truth = np.pad(s2_truth, ((0, 0), (pad_top, pad_bottom), (pad_left, pad_right)), mode='reflect')
+            valid_mask = np.pad(valid_mask, ((0, 0), (pad_top, pad_bottom), (pad_left, pad_right)), mode='constant', constant_values=0)
+        
         # Convert to tensors
         sample = {
             's1': torch.from_numpy(s1).float(),
