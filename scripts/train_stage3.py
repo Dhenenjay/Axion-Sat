@@ -910,6 +910,16 @@ def main():
     lora_params = get_lora_parameters(model)
     print(f"✓ LoRA parameters: {sum(p.numel() for p in lora_params):,}")
     
+    # Debug: check if LoRA parameters require gradients
+    lora_requires_grad = [p.requires_grad for p in lora_params]
+    print(f"\nDebug: LoRA params requiring grad: {sum(lora_requires_grad)}/{len(lora_requires_grad)}")
+    if not all(lora_requires_grad):
+        print("WARNING: Some LoRA parameters don't require gradients!")
+        # Enable gradients for all LoRA params
+        for p in lora_params:
+            p.requires_grad = True
+        print("✓ Fixed: All LoRA parameters now require gradients")
+    
     # Count trainable parameters
     total_params = sum(p.numel() for p in model.parameters())
     trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)

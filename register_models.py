@@ -105,7 +105,7 @@ def build_terramind_generator_factory(
     """
     from terratorch.registry import FULL_MODEL_REGISTRY
     
-    print(f"Loading TerraMind generator: {input_modalities} → {output_modalities}")
+    print(f"Loading TerraMind generator: {input_modalities} -> {output_modalities}")
     
     # Convert to lists for TerraTorch
     input_list = list(input_modalities)
