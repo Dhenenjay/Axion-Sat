@@ -628,6 +628,11 @@ def train_epoch(
         s2_truth = batch['s2_truth'].to(device)
         valid_mask = batch['valid_mask'].to(device)
         
+        # Enable gradients on inputs for LoRA training
+        # Even though only LoRA parameters are trainable, we need gradient flow through the computation
+        s1.requires_grad_(True)
+        opt_v2.requires_grad_(True)
+        
         # Forward pass with AMP
         with autocast():
             # Debug: check if inputs require gradients
