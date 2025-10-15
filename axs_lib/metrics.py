@@ -52,7 +52,9 @@ class PSNRMetric:
         self.reduction = reduction
         
         if HAS_TORCHMETRICS:
-            self.psnr = PeakSignalNoiseRatio(data_range=data_range, reduction=reduction)
+            # torchmetrics PSNR uses 'elementwise_mean' instead of 'mean'
+            tm_reduction = 'elementwise_mean' if reduction == 'mean' else reduction
+            self.psnr = PeakSignalNoiseRatio(data_range=data_range, reduction=tm_reduction)
         else:
             self.psnr = None
     
@@ -443,10 +445,16 @@ class GACScore:
             )
             self.weights = {k: v / weight_sum for k, v in weights.items()}
         
-        # Initialize metrics
+        # Initialize metrics and move to device
         self.psnr_metric = PSNRMetric()
         self.ssim_metric = SSIMMetric()
         self.sar_edge_metric = SAREdgeAgreementScore()
+        
+        # Move torchmetrics to device if they exist
+        if hasattr(self.psnr_metric, 'psnr') and self.psnr_metric.psnr is not None:
+            self.psnr_metric.psnr = self.psnr_metric.psnr.to(self.device)
+        if hasattr(self.ssim_metric, 'ssim') and self.ssim_metric.ssim is not None:
+            self.ssim_metric.ssim = self.ssim_metric.ssim.to(self.device)
         
         if include_lpips:
             if HAS_LPIPS:
@@ -476,6 +484,11 @@ class GACScore:
             target: Target optical images (B, C, H, W)
             sar: SAR images (B, C, H, W)
         """
+        # Ensure inputs are on the correct device
+        pred = pred.to(self.device)
+        target = target.to(self.device)
+        sar = sar.to(self.device)
+        
         # Compute GAC score for this batch
         gac_score = self(pred, target, sar, return_components=False)
         
