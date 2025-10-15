@@ -197,10 +197,6 @@ class Stage3GroundingModel(nn.Module):
         
         # Run TerraMind conditional generation
         # This will use both S1 and S2 features for grounding
-        # Ensure terramind_generator is on the same device as inputs
-        if next(self.terramind_generator.parameters()).device != s1.device:
-            self.terramind_generator = self.terramind_generator.to(s1.device)
-        
         output_std = self.terramind_generator(
             inputs,
             output_modalities=('S2L2A',),
@@ -269,8 +265,14 @@ def build_stage3_model(
         standardize=standardize
     )
     
-    # Move to device
+    # Move to device (including all buffers)
     model = model.to(device)
+    
+    # Explicitly move terramind_generator buffers
+    # (some internal buffers may not be moved by .to())
+    for name, buf in model.terramind_generator.named_buffers():
+        if buf.device != device:
+            buf.data = buf.data.to(device)
     
     # Count parameters
     total_params = sum(p.numel() for p in model.parameters())
