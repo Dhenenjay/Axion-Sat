@@ -65,7 +65,9 @@ from tqdm import tqdm
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
+# Import both versions: baseline and cross-attention
 from axs_lib.stage3_tm_backbone import build_stage3_backbone_model
+from axs_lib.stage3_tm_crossattn import build_stage3_crossattn_model
 from axs_lib.stage3_losses import Stage3Loss
 from axs_lib.io import save_checkpoint, load_checkpoint
 from axs_lib.reproducibility import set_seed
@@ -814,6 +816,10 @@ def main():
                        help='LoRA alpha (default: 16)')
     parser.add_argument('--pretrained', action='store_true', default=True,
                        help='Use pretrained TerraMind weights')
+    parser.add_argument('--use-crossattn', action='store_true', default=False,
+                       help='Use cross-attention model (better for PANGAEA benchmark)')
+    parser.add_argument('--num-fusion-layers', type=int, default=2,
+                       help='Number of cross-attention fusion layers (default: 2)')
     
     # Training arguments
     parser.add_argument('--batch-size', type=int, default=1,
@@ -828,8 +834,8 @@ def main():
                        help='Weight decay (default: 1e-5)')
     
     # Loss weights
-    parser.add_argument('--sar-weight', type=float, default=1.0,
-                       help='SAR consistency loss weight (default: 1.0)')
+    parser.add_argument('--sar-weight', type=float, default=10.0,
+                       help='SAR consistency loss weight (default: 10.0, increased for better grounding)')
     parser.add_argument('--cycle-weight', type=float, default=0.5,
                        help='Cycle loss weight (default: 0.5)')
     parser.add_argument('--identity-weight', type=float, default=0.3,
@@ -893,12 +899,24 @@ def main():
     print("=" * 80)
     print("Building Stage 3 Model")
     print("=" * 80)
-    model = build_stage3_backbone_model(
-        freeze_backbone=False,  # Full fine-tuning
-        pretrained=args.pretrained,
-        standardize=True,
-        device=device
-    )
+    
+    if args.use_crossattn:
+        print("Using Cross-Attention model (PANGAEA-optimized)\n")
+        model = build_stage3_crossattn_model(
+            freeze_backbone=False,  # Full fine-tuning
+            pretrained=args.pretrained,
+            standardize=True,
+            num_fusion_layers=args.num_fusion_layers,
+            device=device
+        )
+    else:
+        print("Using baseline model\n")
+        model = build_stage3_backbone_model(
+            freeze_backbone=False,  # Full fine-tuning
+            pretrained=args.pretrained,
+            standardize=True,
+            device=device
+        )
     
     # Model already built with trainable parameters - no LoRA needed!
     
