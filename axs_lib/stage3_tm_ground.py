@@ -265,7 +265,8 @@ def build_stage3_model(
         output_modalities=('S2L2A',),  # Optical as output
         timesteps=timesteps,
         standardize=False,  # We handle standardization in our wrapper
-        pretrained=pretrained
+        pretrained=pretrained,
+        img_size=128  # Match our padded tile size
     )
     
     print(f"✓ TerraMind generator loaded (pretrained={pretrained})")
