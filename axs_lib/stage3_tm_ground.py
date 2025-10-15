@@ -190,9 +190,17 @@ class Stage3GroundingModel(nn.Module):
         
         # Prepare inputs for TerraMind
         # TerraMind expects a dict with modality keys
+        # S2L2A modality expects 6 channels, but we only have 4
+        # Pad with zeros for missing SWIR bands (B11, B12)
+        if opt_v2_std.shape[1] == 4:
+            # Pad to 6 channels: [B02, B03, B04, B08] → [B02, B03, B04, B08, 0, 0]
+            zeros = torch.zeros(opt_v2_std.shape[0], 2, opt_v2_std.shape[2], opt_v2_std.shape[3],
+                               device=opt_v2_std.device, dtype=opt_v2_std.dtype)
+            opt_v2_std = torch.cat([opt_v2_std, zeros], dim=1)
+        
         inputs = {
             'S1GRD': s1_std,
-            'S2L2A': opt_v2_std  # Condition on Stage 2 output
+            'S2L2A': opt_v2_std  # Condition on Stage 2 output (6 channels)
         }
         
         # Run TerraMind conditional generation
@@ -202,6 +210,10 @@ class Stage3GroundingModel(nn.Module):
             output_modalities=('S2L2A',),
             timesteps=timesteps
         )['S2L2A']
+        
+        # TerraMind outputs 6 channels, crop to 4 (B02, B03, B04, B08)
+        if output_std.shape[1] == 6:
+            output_std = output_std[:, :4, :, :]
         
         # Destandardize output
         output = self.destandardize_output(output_std)
