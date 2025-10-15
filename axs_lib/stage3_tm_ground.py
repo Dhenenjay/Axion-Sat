@@ -220,11 +220,13 @@ class Stage3GroundingModel(nn.Module):
         
         # Run TerraMind conditional generation
         # This will use both S1 and S2 features for grounding
-        output_std = self.terramind_generator(
-            inputs,
-            output_modalities=('S2L2A',),
-            timesteps=timesteps
-        )['S2L2A']
+        # IMPORTANT: Force gradient computation even if model has inference decorators
+        with torch.set_grad_enabled(True):
+            output_std = self.terramind_generator(
+                inputs,
+                output_modalities=('S2L2A',),
+                timesteps=timesteps
+            )['S2L2A']
         
         # Crop output back to original size
         output_std = output_std[:, :, :orig_h, :orig_w]
@@ -288,6 +290,13 @@ def build_stage3_model(
     )
     
     print(f"✓ TerraMind generator loaded (pretrained={pretrained})")
+    
+    # CRITICAL FIX: Remove @torch.no_grad() decorator from TerraMind's forward method
+    # TerraMind's generator uses @torch.no_grad() for inference, but we need gradients for training
+    if hasattr(terramind_generator.forward, '__wrapped__'):
+        # Unwrap the decorator
+        terramind_generator.forward = terramind_generator.forward.__wrapped__
+        print("✓ Unwrapped @torch.no_grad() decorator from TerraMind forward")
     
     # Wrap in Stage 3 model
     model = Stage3GroundingModel(
