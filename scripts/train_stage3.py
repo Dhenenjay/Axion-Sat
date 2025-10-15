@@ -65,7 +65,7 @@ from tqdm import tqdm
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from axs_lib.stage3_tm_ground import build_stage3_model
+from axs_lib.stage3_tm_backbone import build_stage3_backbone_model
 from axs_lib.stage3_losses import Stage3Loss
 from axs_lib.io import save_checkpoint, load_checkpoint
 from axs_lib.reproducibility import set_seed
@@ -74,10 +74,13 @@ from axs_lib.metrics import GACScore
 
 
 # ============================================================================
-# LoRA Implementation for Cross-Attention
+# Note: LoRA implementation removed - using full fine-tuning with backbone
 # ============================================================================
 
-class LoRALayer(nn.Module):
+# LoRA classes removed - no longer needed
+# Using TerraMind backbone + lightweight decoder instead
+
+class _RemovedLoRALayer(nn.Module):
     """
     LoRA (Low-Rank Adaptation) layer for parameter-efficient fine-tuning.
     
@@ -196,8 +199,9 @@ def apply_lora_to_cross_attention(
             alpha=alpha
         ).to(device)  # Move LoRA to same device as module
         
-        # Attach LoRA as attribute
-        setattr(submodule, 'lora_adapter', lora_layer)
+        # Register LoRA as a submodule (NOT just an attribute)
+        # This ensures PyTorch tracks it in the module hierarchy and gradient graph
+        submodule.add_module('lora_adapter', lora_layer)
         
         # Monkey-patch forward method
         original_forward = submodule.forward
@@ -626,20 +630,16 @@ def train_epoch(
         s2_truth = batch['s2_truth'].to(device)
         valid_mask = batch['valid_mask'].to(device)
         
+        # NOTE: We don't need to set requires_grad on inputs explicitly.
+        # The LoRA parameters have requires_grad=True, so when inputs pass through
+        # LoRA layers, PyTorch automatically creates a computation graph from
+        # the LoRA parameters to the output. This is how LoRA fine-tuning works:
+        # frozen base + trainable LoRA = gradients flow only through LoRA path.
+        
         # Forward pass with AMP
         with autocast():
-            # Debug: check if inputs require gradients
-            if i == 0:
-                print(f"\nDebug: s1.requires_grad = {s1.requires_grad}")
-                print(f"Debug: opt_v2.requires_grad = {opt_v2.requires_grad}")
-            
             # Generate opt_v3
             opt_v3 = model(s1, opt_v2)
-            
-            # Debug: check if output requires gradients
-            if i == 0:
-                print(f"Debug: opt_v3.requires_grad = {opt_v3.requires_grad}")
-                print(f"Debug: opt_v3.grad_fn = {opt_v3.grad_fn}")
             
             # Compute loss
             losses = criterion(
@@ -651,11 +651,6 @@ def train_epoch(
             )
             
             loss = losses['total'] / grad_accum_steps
-            
-            # Debug: check if loss requires gradients
-            if i == 0:
-                print(f"Debug: loss.requires_grad = {loss.requires_grad}")
-                print(f"Debug: loss.grad_fn = {loss.grad_fn}")
         
         # Backward pass with AMP
         scaler.scale(loss).backward()
@@ -898,52 +893,14 @@ def main():
     print("=" * 80)
     print("Building Stage 3 Model")
     print("=" * 80)
-    model = build_stage3_model(
-        timesteps=args.timesteps,
-        standardize=True,
+    model = build_stage3_backbone_model(
+        freeze_backbone=False,  # Full fine-tuning
         pretrained=args.pretrained,
+        standardize=True,
         device=device
     )
     
-    # Freeze all base model parameters first
-    print("\n" + "=" * 80)
-    print("Freezing Base Model Parameters")
-    print("=" * 80)
-    for name, param in model.named_parameters():
-        param.requires_grad = False
-    print("✓ All base model parameters frozen")
-    
-    # Apply LoRA to cross-attention layers
-    print("\n" + "=" * 80)
-    print("Applying LoRA to Cross-Attention Layers")
-    print("=" * 80)
-    num_lora = apply_lora_to_cross_attention(
-        model,
-        rank=args.lora_rank,
-        alpha=args.lora_alpha,
-        verbose=True
-    )
-    print(f"\n✓ Added LoRA to {num_lora} layers")
-    
-    # Get LoRA parameters
-    lora_params = get_lora_parameters(model)
-    print(f"✓ LoRA parameters: {sum(p.numel() for p in lora_params):,}")
-    
-    # Debug: check if LoRA parameters require gradients
-    lora_requires_grad = [p.requires_grad for p in lora_params]
-    print(f"\nDebug: LoRA params requiring grad: {sum(lora_requires_grad)}/{len(lora_requires_grad)}")
-    if not all(lora_requires_grad):
-        print("WARNING: Some LoRA parameters don't require gradients!")
-        # Enable gradients for all LoRA params
-        for p in lora_params:
-            p.requires_grad = True
-        print("✓ Fixed: All LoRA parameters now require gradients")
-    
-    # Count trainable parameters
-    total_params = sum(p.numel() for p in model.parameters())
-    trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    print(f"✓ Total parameters: {total_params:,}")
-    print(f"✓ Trainable parameters: {trainable_params:,} ({100*trainable_params/total_params:.2f}%)")
+    # Model already built with trainable parameters - no LoRA needed!
     
     # Build loss function
     print("\n" + "=" * 80)
@@ -974,19 +931,19 @@ def main():
     else:
         print(f"  DEM weight: {args.dem_weight} (disabled)")
     
-    # Build optimizer (only optimize LoRA parameters)
+    # Build optimizer (optimize all trainable parameters)
     print("\n" + "=" * 80)
     print("Building Optimizer")
     print("=" * 80)
     optimizer = torch.optim.AdamW(
-        lora_params,
+        filter(lambda p: p.requires_grad, model.parameters()),
         lr=args.lr,
         weight_decay=args.weight_decay
     )
     print(f"✓ AdamW optimizer initialized")
     print(f"  Learning rate: {args.lr}")
     print(f"  Weight decay: {args.weight_decay}")
-    print(f"  Optimizing {len(lora_params)} LoRA parameter groups")
+    print(f"  Optimizing {sum(p.numel() for p in model.parameters() if p.requires_grad):,} parameters")
     
     # Learning rate scheduler (cosine annealing)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
