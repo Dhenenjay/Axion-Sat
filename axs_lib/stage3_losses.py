@@ -99,9 +99,14 @@ class SARFeatureExtractor(nn.Module):
         Returns:
             Edge magnitude (B, C, H, W)
         """
-        # Compute gradients for each channel
-        grad_x = F.conv2d(image, self.sobel_x, padding=1, groups=image.shape[1] if image.shape[1] > 1 else 1)
-        grad_y = F.conv2d(image, self.sobel_y, padding=1, groups=image.shape[1] if image.shape[1] > 1 else 1)
+        # Replicate Sobel kernels for each channel
+        C = image.shape[1]
+        sobel_x = self.sobel_x.repeat(C, 1, 1, 1)  # (C, 1, 3, 3)
+        sobel_y = self.sobel_y.repeat(C, 1, 1, 1)  # (C, 1, 3, 3)
+        
+        # Compute gradients for each channel with grouped convolution
+        grad_x = F.conv2d(image, sobel_x, padding=1, groups=C)
+        grad_y = F.conv2d(image, sobel_y, padding=1, groups=C)
         
         # Edge magnitude
         edges = torch.sqrt(grad_x ** 2 + grad_y ** 2 + 1e-8)
