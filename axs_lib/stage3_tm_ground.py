@@ -185,8 +185,22 @@ class Stage3GroundingModel(nn.Module):
         if timesteps is None:
             timesteps = self.timesteps
         
+        # Store original spatial size for cropping later
+        orig_h, orig_w = s1.shape[2], s1.shape[3]
+        
         # Standardize inputs
         s1_std, opt_v2_std = self.standardize_inputs(s1, opt_v2)
+        
+        # Pad inputs to 224x224 (TerraMind pretrained size)
+        # Our tiles are 128x128, need to pad to 224x224
+        target_size = 224
+        if s1_std.shape[2] != target_size or s1_std.shape[3] != target_size:
+            pad_h = target_size - s1_std.shape[2]
+            pad_w = target_size - s1_std.shape[3]
+            # Pad: (left, right, top, bottom)
+            pad = (0, pad_w, 0, pad_h)
+            s1_std = torch.nn.functional.pad(s1_std, pad, mode='constant', value=0)
+            opt_v2_std = torch.nn.functional.pad(opt_v2_std, pad, mode='constant', value=0)
         
         # Prepare inputs for TerraMind
         # TerraMind expects a dict with modality keys
@@ -210,6 +224,9 @@ class Stage3GroundingModel(nn.Module):
             output_modalities=('S2L2A',),
             timesteps=timesteps
         )['S2L2A']
+        
+        # Crop output back to original size
+        output_std = output_std[:, :, :orig_h, :orig_w]
         
         # TerraMind outputs 6 channels, crop to 4 (B02, B03, B04, B08)
         if output_std.shape[1] == 6:
@@ -266,7 +283,7 @@ def build_stage3_model(
         timesteps=timesteps,
         standardize=False,  # We handle standardization in our wrapper
         pretrained=pretrained,
-        img_size=128  # Match our padded tile size
+        img_size=224  # Use pretrained img_size (we pad inputs in forward())
     )
     
     print(f"✓ TerraMind generator loaded (pretrained={pretrained})")
