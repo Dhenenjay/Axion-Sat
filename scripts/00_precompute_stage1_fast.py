@@ -179,12 +179,12 @@ def main():
             batch_mse = np.mean((opt_v1_subset - s2_batch) ** 2)
             total_loss += batch_mse * len(valid_paths)
             
-            # Save outputs
+            # Save outputs (save the 4-band subset, not all 12 bands)
             for j, tile_path in enumerate(valid_paths):
                 output_path = output_dir / tile_path.name
                 np.savez_compressed(
                     output_path,
-                    opt_v1=opt_v1[j],
+                    opt_v1=opt_v1_subset[j],  # Save 4 bands, not 12
                     source_tile=str(tile_path)
                 )
             
