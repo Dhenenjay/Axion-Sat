@@ -886,6 +886,14 @@ def main():
         device=device
     )
     
+    # Freeze all base model parameters first
+    print("\n" + "=" * 80)
+    print("Freezing Base Model Parameters")
+    print("=" * 80)
+    for name, param in model.named_parameters():
+        param.requires_grad = False
+    print("✓ All base model parameters frozen")
+    
     # Apply LoRA to cross-attention layers
     print("\n" + "=" * 80)
     print("Applying LoRA to Cross-Attention Layers")
