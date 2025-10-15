@@ -1,0 +1,24 @@
+{
+  "tile_id": "demo_r00512_c00000",
+  "row": 512,
+  "col": 0,
+  "width": 256,
+  "height": 256,
+  "geotransform": [
+    500000,
+    10,
+    0,
+    4494880,
+    0,
+    -10
+  ],
+  "crs": "EPSG:32610",
+  "timestamp": "2025-10-13T06:50:44.290860Z",
+  "source_files": {},
+  "tile_bounds": {
+    "minx": 500000,
+    "miny": 4492320,
+    "maxx": 502560,
+    "maxy": 4494880
+  }
+}

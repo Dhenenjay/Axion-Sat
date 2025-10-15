@@ -1,0 +1,221 @@
+# ============================================================================
+# Ruff Configuration - Axion-Sat Project
+# Fast Python linter and formatter
+# ============================================================================
+
+# Line length to match Black
+line-length = 100
+indent-width = 4
+
+# Target Python version
+target-version = "py311"
+
+# Output formatting
+output-format = "concise"
+
+# Exclude directories
+exclude = [
+    ".git",
+    ".venv",
+    "venv",
+    "__pycache__",
+    ".pytest_cache",
+    ".mypy_cache",
+    ".ruff_cache",
+    "build",
+    "dist",
+    "cache",
+    "outputs",
+    "weights",
+    "data",
+    "*.egg-info",
+]
+
+# ============================================================================
+# Linting Rules
+# ============================================================================
+
+[lint]
+# Enable linting rules
+select = [
+    "E",     # pycodestyle errors
+    "W",     # pycodestyle warnings
+    "F",     # pyflakes
+    "I",     # isort (import sorting)
+    "N",     # pep8-naming
+    "D",     # pydocstyle (docstrings)
+    "UP",    # pyupgrade (upgrade syntax for newer Python)
+    "YTT",   # flake8-2020
+    "ANN",   # flake8-annotations
+    "ASYNC", # flake8-async
+    "S",     # flake8-bandit (security)
+    "BLE",   # flake8-blind-except
+    "B",     # flake8-bugbear
+    "A",     # flake8-builtins
+    "COM",   # flake8-commas
+    "C4",    # flake8-comprehensions
+    "DTZ",   # flake8-datetimez
+    "T10",   # flake8-debugger
+    "EM",    # flake8-errmsg
+    "EXE",   # flake8-executable
+    "ISC",   # flake8-implicit-str-concat
+    "ICN",   # flake8-import-conventions
+    "G",     # flake8-logging-format
+    "INP",   # flake8-no-pep420
+    "PIE",   # flake8-pie
+    "T20",   # flake8-print
+    "PYI",   # flake8-pyi
+    "PT",    # flake8-pytest-style
+    "Q",     # flake8-quotes
+    "RSE",   # flake8-raise
+    "RET",   # flake8-return
+    "SLF",   # flake8-self
+    "SIM",   # flake8-simplify
+    "TID",   # flake8-tidy-imports
+    "TCH",   # flake8-type-checking
+    "ARG",   # flake8-unused-arguments
+    "PTH",   # flake8-use-pathlib
+    "ERA",   # eradicate (commented-out code)
+    "PL",    # pylint
+    "TRY",   # tryceratops
+    "FLY",   # flynt
+    "PERF",  # perflint
+    "RUF",   # ruff-specific rules
+]
+
+# Disable specific rules that may be too strict for ML/research code
+ignore = [
+    "E501",    # line too long (handled by Black)
+    "D100",    # missing docstring in public module
+    "D101",    # missing docstring in public class
+    "D102",    # missing docstring in public method
+    "D103",    # missing docstring in public function
+    "D104",    # missing docstring in public package
+    "D105",    # missing docstring in magic method
+    "D107",    # missing docstring in __init__
+    "ANN101",  # missing type annotation for self
+    "ANN102",  # missing type annotation for cls
+    "ANN401",  # dynamically typed expressions (Any)
+    "S101",    # use of assert (common in tests)
+    "S301",    # pickle usage (common in ML)
+    "S311",    # pseudo-random generators (not security critical)
+    "S324",    # hashlib without usedforsecurity (not needed for ML)
+    "COM812",  # trailing comma missing (conflicts with formatter)
+    "ISC001",  # implicit string concatenation (conflicts with formatter)
+    "T201",    # print statements (useful for debugging)
+    "T203",    # pprint statements
+    "PLR0913", # too many arguments in function
+    "PLR2004", # magic value in comparison
+    "TRY003",  # long exception messages
+    "EM101",   # exception must not use string literal
+    "EM102",   # exception must not use f-string literal
+]
+
+# Allow autofix for all enabled rules (when `--fix` is provided)
+fixable = ["ALL"]
+unfixable = []
+
+# Allow unused variables when prefixed with underscore
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+# ============================================================================
+# Per-file Ignores
+# ============================================================================
+
+[lint.per-file-ignores]
+"__init__.py" = [
+    "F401",  # unused imports (common in __init__.py)
+    "F403",  # star imports
+    "E402",  # module level import not at top
+]
+"tests/**/*.py" = [
+    "S101",   # use of assert
+    "ANN",    # type annotations
+    "D",      # docstrings
+    "PLR2004", # magic values
+    "ARG001", # unused function arguments
+]
+"notebooks/**/*.py" = [
+    "T201",   # print statements
+    "D",      # docstrings
+    "ANN",    # type annotations
+]
+"scripts/**/*.py" = [
+    "T201",   # print statements
+    "INP001", # implicit namespace package
+]
+
+# ============================================================================
+# Import Sorting (isort style)
+# ============================================================================
+
+[lint.isort]
+# Import sorting configuration (isort-compatible)
+known-first-party = ["vc_lib", "app"]
+section-order = [
+    "future",
+    "standard-library",
+    "third-party",
+    "first-party",
+    "local-folder",
+]
+combine-as-imports = true
+split-on-trailing-comma = true
+lines-between-types = 1
+force-sort-within-sections = true
+
+# Force specific imports into sections
+[lint.isort.sections]
+# ML/DL frameworks
+"torch" = ["torch", "torchvision", "torchaudio"]
+# Transformers and ML libs
+"transformers" = ["transformers", "accelerate", "peft", "timm"]
+# Geospatial
+"geo" = ["rasterio", "geopandas", "shapely", "pyproj", "gdal"]
+# Data science
+"data" = ["numpy", "pandas", "xarray"]
+
+# ============================================================================
+# Docstring Conventions (Google style)
+# ============================================================================
+
+[lint.pydocstyle]
+convention = "google"
+
+# ============================================================================
+# McCabe Complexity
+# ============================================================================
+
+[lint.mccabe]
+max-complexity = 15
+
+# ============================================================================
+# Pylint Settings
+# ============================================================================
+
+[lint.pylint]
+max-args = 10
+max-branches = 15
+max-returns = 8
+max-statements = 60
+
+# ============================================================================
+# Formatting (when using Ruff as formatter)
+# ============================================================================
+
+[format]
+# Use double quotes for strings
+quote-style = "double"
+
+# Indent with spaces
+indent-style = "space"
+
+# Use `\n` line endings for all files
+line-ending = "auto"
+
+# Skip magic trailing comma behavior
+skip-magic-trailing-comma = false
+
+# Format docstrings
+docstring-code-format = true
+docstring-code-line-length = 80

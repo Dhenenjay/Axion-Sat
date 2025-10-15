@@ -1,0 +1,43 @@
+hardware:
+  gpu_vram_gb: 12
+  target_utilization: 0.85
+  emergency_threshold: 0.95
+oom_strategies:
+- name: cache_clear
+  description: Clear CUDA cache
+  empty_cache: true
+  max_retries: 1
+  cooldown_seconds: 1.0
+- name: reduce_batch_50
+  description: Reduce batch size by 50%
+  batch_size_scale: 0.5
+  empty_cache: true
+  max_retries: 2
+  cooldown_seconds: 2.0
+- name: reduce_batch_and_tile
+  description: Reduce batch size and tile size
+  batch_size_scale: 0.5
+  tile_size_scale: 0.75
+  empty_cache: true
+  enable_gradient_checkpointing: true
+  max_retries: 2
+  cooldown_seconds: 2.0
+- name: aggressive_reduction
+  description: Aggressive reduction with FP16
+  batch_size_scale: 0.125
+  tile_size_scale: 0.5
+  empty_cache: true
+  enable_gradient_checkpointing: true
+  use_fp16: true
+  max_retries: 2
+  cooldown_seconds: 3.0
+- name: minimal_mode
+  description: 'Minimal mode: single sample'
+  batch_size_scale: 0.0625
+  tile_size_scale: 0.5
+  num_timesteps_scale: 0.75
+  empty_cache: true
+  enable_gradient_checkpointing: true
+  use_fp16: true
+  max_retries: 1
+  cooldown_seconds: 3.0

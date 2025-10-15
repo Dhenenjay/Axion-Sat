@@ -1,0 +1,60 @@
+{
+  "export_info": {
+    "timestamp": "2025-10-14T09:58:11.715039",
+    "selection_criteria": "spectral_improvement_and_edge_penalty",
+    "spectral_weight": 1.0,
+    "edge_penalty_weight": 10.0
+  },
+  "best_checkpoint": {
+    "checkpoint_path": "models\\test_checkpoints\\checkpoint_10000.pt",
+    "step": 10000,
+    "epoch": 10,
+    "metrics": {
+      "ndvi_rmse_v2": 0.065,
+      "evi_rmse_v2": 0.07,
+      "sam_v2": 0.13,
+      "ndvi_rmse_v1": 0.085,
+      "evi_rmse_v1": 0.095,
+      "sam_v1": 0.18,
+      "mean_edge_displacement": 1.5,
+      "max_edge_displacement": 3.5,
+      "edge_ratio": 0.85
+    },
+    "improvements": {
+      "ndvi_improvement": 0.020000000000000004,
+      "evi_improvement": 0.024999999999999994,
+      "sam_improvement": 0.04999999999999999
+    },
+    "score": {
+      "composite_score": 0.06999999999999999,
+      "passes_hard_constraints": true
+    }
+  },
+  "all_checkpoints": [
+    {
+      "checkpoint_path": "models\\test_checkpoints\\checkpoint_10000.pt",
+      "step": 10000,
+      "epoch": 10,
+      "metrics": {
+        "ndvi_rmse_v2": 0.065,
+        "evi_rmse_v2": 0.07,
+        "sam_v2": 0.13,
+        "ndvi_rmse_v1": 0.085,
+        "evi_rmse_v1": 0.095,
+        "sam_v1": 0.18,
+        "mean_edge_displacement": 1.5,
+        "max_edge_displacement": 3.5,
+        "edge_ratio": 0.85
+      },
+      "improvements": {
+        "ndvi_improvement": 0.020000000000000004,
+        "evi_improvement": 0.024999999999999994,
+        "sam_improvement": 0.04999999999999999
+      },
+      "score": {
+        "composite_score": 0.06999999999999999,
+        "passes_hard_constraints": true
+      }
+    }
+  ]
+}

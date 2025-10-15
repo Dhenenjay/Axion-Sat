@@ -1,0 +1,143 @@
+augmentation:
+  brightness: 0.2
+  color_jitter: true
+  contrast: 0.2
+  gaussian_noise: true
+  hflip: true
+  hflip_prob: 0.5
+  hue: 0.0
+  noise_std: 0.01
+  random_crop: false
+  rotation: true
+  rotation_degrees: 15
+  saturation: 0.0
+  vflip: true
+  vflip_prob: 0.5
+compatible_with:
+  axion_sat_version: '>=0.1.0'
+  cuda_version: '>=11.8'
+  pytorch_version: '>=2.0.0'
+config_version: '1.0'
+created: '2025-10-13'
+data:
+  num_workers: 2
+  pin_memory: true
+  prefetch_factor: 2
+  tile_overlap: 64
+  tile_size: 96
+hardware:
+  allow_tf32: true
+  cudnn_benchmark: true
+  cudnn_deterministic: false
+  device: cuda
+  gpu_id: 0
+  num_threads: 4
+inference:
+  batch_size: 2
+  enable_tiling: true
+  num_steps:
+    stage1: 8
+    stage3: 6
+  tile_overlap: 64
+  use_amp: true
+  use_compile: false
+last_updated: '2025-10-13'
+logging:
+  log_dir: logs/lowvram
+  log_interval: 100
+  sample_interval: 500
+  save_samples: true
+  tensorboard:
+    enabled: true
+    log_dir: logs/lowvram/tensorboard
+  wandb:
+    enabled: false
+    entity: null
+    project: axion-sat-lowvram
+memory:
+  channels_last: true
+  cpu_offload: true
+  empty_cache: false
+  max_memory_fraction: 0.9
+  xformers: true
+stage1:
+  loss:
+    feature_loss_weight: 1.0
+    perceptual_loss_weight: 0.1
+    reconstruction_loss_weight: 0.5
+  model:
+    name: terramind_s1_s2
+    tm_s1:
+      dropout: 0.1
+      embed_dim: 256
+      num_heads: 8
+      timesteps: 12
+    tm_s2:
+      dropout: 0.1
+      embed_dim: 256
+      num_heads: 8
+      timesteps: 12
+stage2:
+  loss:
+    dice_weight: 0.7
+    focal_alpha: 0.25
+    focal_gamma: 2.0
+    focal_weight: 0.3
+    type: dice_focal
+  model:
+    freeze_base: true
+    lora_alpha: 16
+    lora_dropout: 0.1
+    lora_r: 4
+    lora_target_modules:
+    - qkv
+    - proj
+    name: prithvi_refiner
+    prithvi:
+      checkpoint: weights/prithvi_100M.pt
+      img_size: 96
+      in_channels: 4
+      num_classes: 4
+    use_lora: true
+stage3:
+  loss:
+    ce_weight: 0.4
+    class_weights:
+    - 1.0
+    - 2.0
+    dice_weight: 0.6
+    type: weighted_ce_dice
+  model:
+    cfg:
+      dropout: 0.1
+      enabled: true
+      scale: 3.0
+    conditional:
+      condition_on_image: true
+      condition_on_mask: true
+      dropout: 0.1
+      embed_dim: 256
+      num_heads: 8
+      timesteps: 10
+    name: terramind_conditional
+training:
+  batch_size: 1
+  checkpoint_interval: 10
+  epochs: 1
+  grad_accum_steps: 2
+  gradient_checkpointing: true
+  learning_rate: 1.0e-05
+  lr_scheduler:
+    min_lr: 1.0e-06
+    type: cosine_with_warmup
+    warmup_epochs: 5
+  max_grad_norm: 1.0
+  optimizer:
+    betas:
+    - 0.9
+    - 0.999
+    eps: 1.0e-08
+    type: adamw
+    weight_decay: 0.01
+  precision: fp16
+  validation_interval: 5

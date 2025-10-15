@@ -1,0 +1,167 @@
+place,date,tile_size,overlap,max_cloud,s1_days,s2_days,hls_neighbors,hls_window,out_dir
+"Napa Valley, California, USA",2024-01-15,256,32,20,5,7,2,40,data/tiles/napa_2024-01-15
+"Napa Valley, California, USA",2024-07-10,256,32,15,5,7,2,40,data/tiles/napa_2024-07-10
+"Netherlands",2024-05-20,256,32,20,5,7,2,40,data/tiles/nl_2024-05-20
+"Netherlands",2023-11-25,256,32,25,6,10,2,40,data/tiles/nl_2023-11-25
+"Mumbai, India",2023-07-05,256,32,25,6,10,2,40,data/tiles/mumbai_2023-07-05
+"Mumbai, India",2023-12-10,256,32,20,5,10,2,40,data/tiles/mumbai_2023-12-10
+"Jakarta, Indonesia",2024-03-10,256,32,20,5,7,2,40,data/tiles/jakarta_2024-03-10
+"Jakarta, Indonesia",2024-09-18,256,32,25,6,10,2,40,data/tiles/jakarta_2024-09-18
+"Alps, Europe",2024-02-10,256,32,20,5,10,2,40,data/tiles/alps_2024-02-10
+"Alps, Europe",2024-08-15,256,32,20,5,10,2,40,data/tiles/alps_2024-08-15
+"Amazon Rainforest, Brazil",2024-04-12,256,32,30,7,10,2,40,data/tiles/amazon_2024-04-12
+"Amazon Rainforest, Brazil",2024-10-06,256,32,30,7,10,2,40,data/tiles/amazon_2024-10-06
+"Sahel, Niger",2024-03-22,256,32,25,6,10,2,40,data/tiles/sahel_2024-03-22
+"Sahel, Niger",2024-09-14,256,32,25,6,10,2,40,data/tiles/sahel_2024-09-14
+"Cape Town, South Africa",2024-05-05,256,32,20,5,7,2,40,data/tiles/capetown_2024-05-05
+"Cape Town, South Africa",2023-11-05,256,32,20,5,7,2,40,data/tiles/capetown_2023-11-05
+"Perth, Australia",2024-01-20,256,32,20,5,7,2,40,data/tiles/perth_2024-01-20
+"Perth, Australia",2024-07-20,256,32,20,5,7,2,40,data/tiles/perth_2024-07-20
+"Tromso, Norway",2024-02-25,256,32,20,5,10,2,40,data/tiles/tromso_2024-02-25
+"Tromso, Norway",2024-08-25,256,32,20,5,10,2,40,data/tiles/tromso_2024-08-25
+"Tokyo, Japan",2024-03-20,256,32,20,5,7,2,40,data/tiles/tokyo_2024-03-20
+"Tokyo, Japan",2024-09-15,256,32,20,5,7,2,40,data/tiles/tokyo_2024-09-15
+"Seoul, South Korea",2024-04-10,256,32,20,5,7,2,40,data/tiles/seoul_2024-04-10
+"Seoul, South Korea",2024-10-10,256,32,20,5,7,2,40,data/tiles/seoul_2024-10-10
+"Singapore",2024-01-05,256,32,30,7,10,2,40,data/tiles/singapore_2024-01-05
+"Singapore",2024-07-05,256,32,30,7,10,2,40,data/tiles/singapore_2024-07-05
+"Bangkok, Thailand",2024-02-15,256,32,25,6,10,2,40,data/tiles/bangkok_2024-02-15
+"Bangkok, Thailand",2024-08-15,256,32,25,6,10,2,40,data/tiles/bangkok_2024-08-15
+"Hanoi, Vietnam",2024-03-25,256,32,25,6,10,2,40,data/tiles/hanoi_2024-03-25
+"Hanoi, Vietnam",2024-09-25,256,32,25,6,10,2,40,data/tiles/hanoi_2024-09-25
+"Manila, Philippines",2024-01-30,256,32,30,7,10,2,40,data/tiles/manila_2024-01-30
+"Manila, Philippines",2024-07-30,256,32,30,7,10,2,40,data/tiles/manila_2024-07-30
+"Beijing, China",2024-04-05,256,32,20,5,7,2,40,data/tiles/beijing_2024-04-05
+"Beijing, China",2024-10-05,256,32,20,5,7,2,40,data/tiles/beijing_2024-10-05
+"Shanghai, China",2024-03-15,256,32,20,5,7,2,40,data/tiles/shanghai_2024-03-15
+"Shanghai, China",2024-09-15,256,32,20,5,7,2,40,data/tiles/shanghai_2024-09-15
+"Hong Kong",2024-02-20,256,32,25,6,10,2,40,data/tiles/hongkong_2024-02-20
+"Hong Kong",2024-08-20,256,32,25,6,10,2,40,data/tiles/hongkong_2024-08-20
+"Delhi, India",2024-01-10,256,32,20,5,7,2,40,data/tiles/delhi_2024-01-10
+"Delhi, India",2024-07-10,256,32,25,6,10,2,40,data/tiles/delhi_2024-07-10
+"Bangalore, India",2024-02-28,256,32,25,6,10,2,40,data/tiles/bangalore_2024-02-28
+"Bangalore, India",2024-08-28,256,32,25,6,10,2,40,data/tiles/bangalore_2024-08-28
+"Kolkata, India",2024-03-05,256,32,25,6,10,2,40,data/tiles/kolkata_2024-03-05
+"Kolkata, India",2024-09-05,256,32,25,6,10,2,40,data/tiles/kolkata_2024-09-05
+"Karachi, Pakistan",2024-04-15,256,32,20,5,7,2,40,data/tiles/karachi_2024-04-15
+"Karachi, Pakistan",2024-10-15,256,32,20,5,7,2,40,data/tiles/karachi_2024-10-15
+"Tehran, Iran",2024-03-10,256,32,20,5,7,2,40,data/tiles/tehran_2024-03-10
+"Tehran, Iran",2024-09-10,256,32,20,5,7,2,40,data/tiles/tehran_2024-09-10
+"Istanbul, Turkey",2024-04-20,256,32,20,5,7,2,40,data/tiles/istanbul_2024-04-20
+"Istanbul, Turkey",2024-10-20,256,32,20,5,7,2,40,data/tiles/istanbul_2024-10-20
+"Cairo, Egypt",2024-02-10,256,32,15,5,7,2,40,data/tiles/cairo_2024-02-10
+"Cairo, Egypt",2024-08-10,256,32,15,5,7,2,40,data/tiles/cairo_2024-08-10
+"Lagos, Nigeria",2024-01-20,256,32,30,7,10,2,40,data/tiles/lagos_2024-01-20
+"Lagos, Nigeria",2024-07-20,256,32,30,7,10,2,40,data/tiles/lagos_2024-07-20
+"Nairobi, Kenya",2024-03-01,256,32,25,6,10,2,40,data/tiles/nairobi_2024-03-01
+"Nairobi, Kenya",2024-09-01,256,32,25,6,10,2,40,data/tiles/nairobi_2024-09-01
+"Addis Ababa, Ethiopia",2024-02-05,256,32,20,5,7,2,40,data/tiles/addisababa_2024-02-05
+"Addis Ababa, Ethiopia",2024-08-05,256,32,25,6,10,2,40,data/tiles/addisababa_2024-08-05
+"Johannesburg, South Africa",2024-01-25,256,32,20,5,7,2,40,data/tiles/johannesburg_2024-01-25
+"Johannesburg, South Africa",2024-07-25,256,32,20,5,7,2,40,data/tiles/johannesburg_2024-07-25
+"Kinshasa, Congo",2024-04-01,256,32,30,7,10,2,40,data/tiles/kinshasa_2024-04-01
+"Kinshasa, Congo",2024-10-01,256,32,30,7,10,2,40,data/tiles/kinshasa_2024-10-01
+"London, UK",2024-05-15,256,32,20,5,7,2,40,data/tiles/london_2024-05-15
+"London, UK",2023-11-15,256,32,25,6,10,2,40,data/tiles/london_2023-11-15
+"Paris, France",2024-06-10,256,32,20,5,7,2,40,data/tiles/paris_2024-06-10
+"Paris, France",2023-12-10,256,32,25,6,10,2,40,data/tiles/paris_2023-12-10
+"Berlin, Germany",2024-05-20,256,32,20,5,7,2,40,data/tiles/berlin_2024-05-20
+"Berlin, Germany",2023-11-20,256,32,25,6,10,2,40,data/tiles/berlin_2023-11-20
+"Madrid, Spain",2024-04-25,256,32,20,5,7,2,40,data/tiles/madrid_2024-04-25
+"Madrid, Spain",2024-10-25,256,32,20,5,7,2,40,data/tiles/madrid_2024-10-25
+"Rome, Italy",2024-03-30,256,32,20,5,7,2,40,data/tiles/rome_2024-03-30
+"Rome, Italy",2024-09-30,256,32,20,5,7,2,40,data/tiles/rome_2024-09-30
+"Athens, Greece",2024-05-05,256,32,20,5,7,2,40,data/tiles/athens_2024-05-05
+"Athens, Greece",2024-11-05,256,32,20,5,7,2,40,data/tiles/athens_2024-11-05
+"Stockholm, Sweden",2024-06-15,256,32,20,5,7,2,40,data/tiles/stockholm_2024-06-15
+"Stockholm, Sweden",2023-12-15,256,32,25,6,10,2,40,data/tiles/stockholm_2023-12-15
+"Copenhagen, Denmark",2024-05-25,256,32,20,5,7,2,40,data/tiles/copenhagen_2024-05-25
+"Copenhagen, Denmark",2023-11-25,256,32,25,6,10,2,40,data/tiles/copenhagen_2023-11-25
+"Warsaw, Poland",2024-04-18,256,32,20,5,7,2,40,data/tiles/warsaw_2024-04-18
+"Warsaw, Poland",2024-10-18,256,32,20,5,7,2,40,data/tiles/warsaw_2024-10-18
+"Moscow, Russia",2024-06-01,256,32,20,5,7,2,40,data/tiles/moscow_2024-06-01
+"Moscow, Russia",2023-12-01,256,32,25,6,10,2,40,data/tiles/moscow_2023-12-01
+"New York, USA",2024-05-10,256,32,20,5,7,2,40,data/tiles/newyork_2024-05-10
+"New York, USA",2023-11-10,256,32,20,5,7,2,40,data/tiles/newyork_2023-11-10
+"Los Angeles, USA",2024-03-18,256,32,15,5,7,2,40,data/tiles/losangeles_2024-03-18
+"Los Angeles, USA",2024-09-18,256,32,15,5,7,2,40,data/tiles/losangeles_2024-09-18
+"Chicago, USA",2024-06-05,256,32,20,5,7,2,40,data/tiles/chicago_2024-06-05
+"Chicago, USA",2023-12-05,256,32,25,6,10,2,40,data/tiles/chicago_2023-12-05
+"Houston, USA",2024-04-12,256,32,20,5,7,2,40,data/tiles/houston_2024-04-12
+"Houston, USA",2024-10-12,256,32,20,5,7,2,40,data/tiles/houston_2024-10-12
+"Miami, USA",2024-02-14,256,32,25,6,10,2,40,data/tiles/miami_2024-02-14
+"Miami, USA",2024-08-14,256,32,25,6,10,2,40,data/tiles/miami_2024-08-14
+"Seattle, USA",2024-07-01,256,32,25,6,10,2,40,data/tiles/seattle_2024-07-01
+"Seattle, USA",2024-01-01,256,32,25,6,10,2,40,data/tiles/seattle_2024-01-01
+"Denver, USA",2024-05-18,256,32,20,5,7,2,40,data/tiles/denver_2024-05-18
+"Denver, USA",2023-11-18,256,32,20,5,7,2,40,data/tiles/denver_2023-11-18
+"Phoenix, USA",2024-03-22,256,32,15,5,7,2,40,data/tiles/phoenix_2024-03-22
+"Phoenix, USA",2024-09-22,256,32,15,5,7,2,40,data/tiles/phoenix_2024-09-22
+"Toronto, Canada",2024-06-08,256,32,20,5,7,2,40,data/tiles/toronto_2024-06-08
+"Toronto, Canada",2023-12-08,256,32,25,6,10,2,40,data/tiles/toronto_2023-12-08
+"Vancouver, Canada",2024-05-12,256,32,25,6,10,2,40,data/tiles/vancouver_2024-05-12
+"Vancouver, Canada",2023-11-12,256,32,25,6,10,2,40,data/tiles/vancouver_2023-11-12
+"Montreal, Canada",2024-06-20,256,32,20,5,7,2,40,data/tiles/montreal_2024-06-20
+"Montreal, Canada",2023-12-20,256,32,25,6,10,2,40,data/tiles/montreal_2023-12-20
+"Mexico City, Mexico",2024-04-08,256,32,20,5,7,2,40,data/tiles/mexicocity_2024-04-08
+"Mexico City, Mexico",2024-10-08,256,32,20,5,7,2,40,data/tiles/mexicocity_2024-10-08
+"Guadalajara, Mexico",2024-03-14,256,32,20,5,7,2,40,data/tiles/guadalajara_2024-03-14
+"Guadalajara, Mexico",2024-09-14,256,32,20,5,7,2,40,data/tiles/guadalajara_2024-09-14
+"Havana, Cuba",2024-02-18,256,32,20,5,7,2,40,data/tiles/havana_2024-02-18
+"Havana, Cuba",2024-08-18,256,32,20,5,7,2,40,data/tiles/havana_2024-08-18
+"Guatemala City, Guatemala",2024-03-08,256,32,25,6,10,2,40,data/tiles/guatemala_2024-03-08
+"Guatemala City, Guatemala",2024-09-08,256,32,25,6,10,2,40,data/tiles/guatemala_2024-09-08
+"Bogota, Colombia",2024-02-22,256,32,30,7,10,2,40,data/tiles/bogota_2024-02-22
+"Bogota, Colombia",2024-08-22,256,32,30,7,10,2,40,data/tiles/bogota_2024-08-22
+"Lima, Peru",2024-01-28,256,32,20,5,7,2,40,data/tiles/lima_2024-01-28
+"Lima, Peru",2024-07-28,256,32,20,5,7,2,40,data/tiles/lima_2024-07-28
+"Quito, Ecuador",2024-03-12,256,32,30,7,10,2,40,data/tiles/quito_2024-03-12
+"Quito, Ecuador",2024-09-12,256,32,30,7,10,2,40,data/tiles/quito_2024-09-12
+"Santiago, Chile",2024-01-16,256,32,20,5,7,2,40,data/tiles/santiago_2024-01-16
+"Santiago, Chile",2024-07-16,256,32,20,5,7,2,40,data/tiles/santiago_2024-07-16
+"Buenos Aires, Argentina",2024-02-08,256,32,20,5,7,2,40,data/tiles/buenosaires_2024-02-08
+"Buenos Aires, Argentina",2024-08-08,256,32,20,5,7,2,40,data/tiles/buenosaires_2024-08-08
+"Sao Paulo, Brazil",2024-01-12,256,32,25,6,10,2,40,data/tiles/saopaulo_2024-01-12
+"Sao Paulo, Brazil",2024-07-12,256,32,25,6,10,2,40,data/tiles/saopaulo_2024-07-12
+"Rio de Janeiro, Brazil",2024-02-02,256,32,25,6,10,2,40,data/tiles/riodejaneiro_2024-02-02
+"Rio de Janeiro, Brazil",2024-08-02,256,32,25,6,10,2,40,data/tiles/riodejaneiro_2024-08-02
+"Brasilia, Brazil",2024-03-18,256,32,25,6,10,2,40,data/tiles/brasilia_2024-03-18
+"Brasilia, Brazil",2024-09-18,256,32,25,6,10,2,40,data/tiles/brasilia_2024-09-18
+"Sydney, Australia",2024-01-22,256,32,20,5,7,2,40,data/tiles/sydney_2024-01-22
+"Sydney, Australia",2024-07-22,256,32,20,5,7,2,40,data/tiles/sydney_2024-07-22
+"Melbourne, Australia",2024-02-12,256,32,20,5,7,2,40,data/tiles/melbourne_2024-02-12
+"Melbourne, Australia",2024-08-12,256,32,20,5,7,2,40,data/tiles/melbourne_2024-08-12
+"Brisbane, Australia",2024-03-16,256,32,20,5,7,2,40,data/tiles/brisbane_2024-03-16
+"Brisbane, Australia",2024-09-16,256,32,20,5,7,2,40,data/tiles/brisbane_2024-09-16
+"Auckland, New Zealand",2024-01-18,256,32,25,6,10,2,40,data/tiles/auckland_2024-01-18
+"Auckland, New Zealand",2024-07-18,256,32,25,6,10,2,40,data/tiles/auckland_2024-07-18
+"Wellington, New Zealand",2024-02-26,256,32,25,6,10,2,40,data/tiles/wellington_2024-02-26
+"Wellington, New Zealand",2024-08-26,256,32,25,6,10,2,40,data/tiles/wellington_2024-08-26
+"Sahara Desert, Algeria",2024-04-06,256,32,10,5,7,2,40,data/tiles/sahara_2024-04-06
+"Sahara Desert, Algeria",2024-10-06,256,32,10,5,7,2,40,data/tiles/sahara_2024-10-06
+"Gobi Desert, Mongolia",2024-05-02,256,32,15,5,7,2,40,data/tiles/gobi_2024-05-02
+"Gobi Desert, Mongolia",2024-11-02,256,32,15,5,7,2,40,data/tiles/gobi_2024-11-02
+"Atacama Desert, Chile",2024-01-08,256,32,10,5,7,2,40,data/tiles/atacama_2024-01-08
+"Atacama Desert, Chile",2024-07-08,256,32,10,5,7,2,40,data/tiles/atacama_2024-07-08
+"Great Barrier Reef, Australia",2024-03-28,256,32,20,5,7,2,40,data/tiles/greatbarrierreef_2024-03-28
+"Great Barrier Reef, Australia",2024-09-28,256,32,20,5,7,2,40,data/tiles/greatbarrierreef_2024-09-28
+"Maldives",2024-02-16,256,32,20,5,7,2,40,data/tiles/maldives_2024-02-16
+"Maldives",2024-08-16,256,32,20,5,7,2,40,data/tiles/maldives_2024-08-16
+"Iceland",2024-06-22,256,32,25,6,10,2,40,data/tiles/iceland_2024-06-22
+"Iceland",2023-12-22,256,32,25,6,10,2,40,data/tiles/iceland_2023-12-22
+"Greenland",2024-07-15,256,32,20,5,10,2,40,data/tiles/greenland_2024-07-15
+"Greenland",2024-01-15,256,32,25,6,10,2,40,data/tiles/greenland_2024-01-15
+"Antarctica",2024-01-05,256,32,15,5,10,2,40,data/tiles/antarctica_2024-01-05
+"Antarctica",2024-07-05,256,32,15,5,10,2,40,data/tiles/antarctica_2024-07-05
+"Himalaya, Nepal",2024-04-22,256,32,25,6,10,2,40,data/tiles/himalaya_2024-04-22
+"Himalaya, Nepal",2024-10-22,256,32,25,6,10,2,40,data/tiles/himalaya_2024-10-22
+"Andes, Peru",2024-05-08,256,32,25,6,10,2,40,data/tiles/andes_2024-05-08
+"Andes, Peru",2024-11-08,256,32,25,6,10,2,40,data/tiles/andes_2024-11-08
+"Rocky Mountains, USA",2024-06-18,256,32,20,5,7,2,40,data/tiles/rockies_2024-06-18
+"Rocky Mountains, USA",2023-12-18,256,32,25,6,10,2,40,data/tiles/rockies_2023-12-18
+"Yellowstone, USA",2024-07-08,256,32,20,5,7,2,40,data/tiles/yellowstone_2024-07-08
+"Yellowstone, USA",2024-01-08,256,32,25,6,10,2,40,data/tiles/yellowstone_2024-01-08
+"Grand Canyon, USA",2024-05-14,256,32,15,5,7,2,40,data/tiles/grandcanyon_2024-05-14
+"Grand Canyon, USA",2023-11-14,256,32,15,5,7,2,40,data/tiles/grandcanyon_2023-11-14
+"Yosemite, USA",2024-06-28,256,32,20,5,7,2,40,data/tiles/yosemite_2024-06-28
+"Yosemite, USA",2023-12-28,256,32,25,6,10,2,40,data/tiles/yosemite_2023-12-28

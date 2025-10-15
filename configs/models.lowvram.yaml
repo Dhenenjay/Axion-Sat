@@ -1,0 +1,388 @@
+# configs/models.lowvram.yaml
+# Low-VRAM Model Configuration for Axion-Sat Pipeline
+#
+# Optimized for consumer GPUs (8-12 GB VRAM):
+#   - Reduced Sentinel-2 bands (4 instead of 6)
+#   - LoRA fine-tuning for Prithvi
+#   - Minimal diffusion timesteps
+#   - Frozen encoder layers where possible
+#
+# Target Hardware: NVIDIA RTX 4060/3060 Ti (12 GB) or RTX 3060 (8 GB)
+
+# ==============================================================================
+# Global Settings
+# ==============================================================================
+
+seed: 42
+device: "cuda"  # "cuda" or "cpu"
+mixed_precision: true  # FP16 training for memory efficiency
+gradient_checkpointing: true  # Trade compute for memory
+
+# ==============================================================================
+# Data Configuration
+# ==============================================================================
+
+data:
+  # Sentinel-1 SAR Configuration
+  sentinel1:
+    channels: ["VV", "VH"]  # Dual polarization
+    num_channels: 2
+    dtype: "float32"
+    
+  # Sentinel-2 Optical Configuration (Reduced Band Set)
+  sentinel2:
+    bands: ["B02", "B03", "B04", "B08"]  # Blue, Green, Red, NIR
+    band_names:
+      B02: "Blue (490 nm)"
+      B03: "Green (560 nm)"
+      B04: "Red (665 nm)"
+      B08: "NIR (842 nm)"
+    num_bands: 4
+    dtype: "float32"
+    
+    # Note: This is a reduced subset from the full 6-band configuration
+    # Full set would include B11 (SWIR1, 1610 nm) and B12 (SWIR2, 2190 nm)
+    # Reducing to 4 bands saves ~33% memory during processing
+    
+  # Spatial Configuration
+  spatial:
+    patch_size: 128  # Reduced from 384 for low VRAM
+    overlap: 16      # Overlap for seamless stitching
+    target_resolution: 10  # meters (Sentinel-2 native for RGB+NIR)
+    
+  # Temporal Configuration
+  temporal:
+    time_steps: 1    # Single timestep (no temporal fusion)
+    
+  # Preprocessing
+  preprocessing:
+    normalize: true
+    standardize: true
+    clip_percentiles: [2, 98]  # Robust outlier clipping
+
+# ==============================================================================
+# Stage 1: TerraMind Generator (SAR → Optical Latent)
+# ==============================================================================
+
+terramind_generator:
+  # Model Identification
+  model_name: "terramind_1.0_large"
+  model_type: "generator"
+  
+  # Modality Configuration (EXACT enums from TerraTorch)
+  input_modalities: ["S1GRD"]   # Sentinel-1 Ground Range Detected
+  output_modalities: ["S2L2A"]  # Sentinel-2 Level-2A (Surface Reflectance)
+  
+  # Architecture Settings
+  architecture:
+    embed_dim: 768          # Reduced from 1024 for memory
+    num_heads: 8            # Reduced from 16
+    num_layers: 12          # Reduced from 24
+    patch_size: 16
+    dropout: 0.1
+    
+  # Diffusion Configuration (Critical for Low VRAM)
+  diffusion:
+    timesteps: 6            # Minimal (training: 50, inference: 6-12)
+    noise_schedule: "cosine"
+    loss_type: "l2"
+    
+  # Training Configuration
+  training:
+    pretrained: true        # Load pre-trained weights
+    freeze_encoder: false   # Allow encoder fine-tuning
+    standardize: true       # Normalize inputs/outputs
+    
+    # Memory Optimization
+    gradient_checkpointing: true
+    use_flash_attention: true  # If available (2-4x speedup, less memory)
+    
+  # Generation Settings
+  generation:
+    guidance_scale: 1.0     # No classifier-free guidance (saves memory)
+    num_inference_steps: 6  # Fast inference
+    
+  # Checkpoint
+  checkpoint:
+    path: null              # Use default TerraTorch weights
+    load_strict: true
+
+# ==============================================================================
+# Stage 2: Prithvi Refinement (Latent → Segmentation Mask)
+# ==============================================================================
+
+prithvi_600:
+  # Model Identification
+  model_name: "prithvi_eo_2.0_600M"
+  model_type: "segmentation"
+  
+  # Architecture Settings
+  architecture:
+    img_size: 128           # Must match data.spatial.patch_size
+    patch_size: 16
+    in_channels: 4          # Matches S2 bands (B02, B03, B04, B08)
+    num_classes: 1          # Binary segmentation (water/non-water)
+    embed_dim: 768
+    depth: 12
+    num_heads: 12
+    
+  # LoRA Configuration (Parameter-Efficient Fine-Tuning)
+  lora:
+    enabled: true
+    rank: 8                 # Balanced quality/memory (4=minimal, 16=high)
+    alpha: 16               # Scaling factor (typically 2x rank)
+    dropout: 0.1
+    target_modules: ["qkv", "proj"]  # Apply to attention layers
+    bias: "none"
+    
+    # LoRA reduces trainable parameters from ~600M to ~60M (90% reduction)
+    # Enables fine-tuning on 8 GB GPUs with acceptable quality loss
+    
+  # Training Configuration
+  training:
+    pretrained: true        # Load pre-trained Prithvi weights
+    freeze_encoder: true    # Only train decoder + LoRA adapters
+    freeze_backbone: false  # LoRA adapters remain trainable
+    
+    # Decoder settings
+    decoder_channels: [256, 128, 64, 32]
+    decoder_use_batchnorm: true
+    
+  # Output Configuration
+  output:
+    activation: "sigmoid"   # Binary segmentation [0, 1]
+    threshold: 0.5          # Classification threshold
+    
+  # Memory Optimization
+  memory:
+    gradient_checkpointing: true
+    use_flash_attention: true
+    
+  # Checkpoint
+  checkpoint:
+    path: null              # Use default TerraTorch weights
+    load_strict: false      # Allow LoRA module insertion
+
+# ==============================================================================
+# Stage 3: Conditional Grounding (Planned)
+# ==============================================================================
+
+terramind_conditional:
+  # Placeholder for future Stage 3 implementation
+  # This stage will perform semantic grounding and boundary refinement
+  enabled: false
+  model_name: "terramind_1.0_large_conditional"
+  
+  # When implemented, this stage will:
+  # 1. Receive Stage 2 segmentation masks
+  # 2. Apply boundary refinement using TerraMind's cross-modal reasoning
+  # 3. Ensure semantic consistency with input modalities
+  # 4. Output final high-quality segmentation masks
+
+# ==============================================================================
+# Training Configuration
+# ==============================================================================
+
+training:
+  # Optimization
+  optimizer:
+    type: "adamw"
+    lr: 1.0e-4              # Conservative learning rate
+    betas: [0.9, 0.999]
+    weight_decay: 0.01
+    eps: 1.0e-8
+    
+  # Learning Rate Schedule
+  lr_scheduler:
+    type: "cosine"
+    warmup_epochs: 5
+    min_lr: 1.0e-6
+    
+  # Training Dynamics
+  batch_size: 1             # Single sample per batch (low VRAM)
+  accumulation_steps: 8     # Effective batch size = 8
+  max_epochs: 50
+  
+  # Mixed Precision Training
+  mixed_precision:
+    enabled: true
+    dtype: "float16"        # FP16 for 2x memory savings
+    
+  # Gradient Configuration
+  gradient:
+    clip_norm: 1.0          # Prevent exploding gradients
+    clip_value: null
+    
+  # Validation
+  validation:
+    frequency: 1            # Validate every epoch
+    batch_size: 1
+    
+  # Checkpointing
+  checkpointing:
+    save_frequency: 5       # Save every 5 epochs
+    keep_last_n: 3          # Keep only 3 most recent checkpoints
+    save_best: true         # Save best validation model
+    metric: "iou"           # Intersection over Union
+
+# ==============================================================================
+# Loss Functions
+# ==============================================================================
+
+loss:
+  # Stage 1: Generator Loss
+  stage1:
+    type: "mse"             # Mean Squared Error for latent matching
+    weight: 1.0
+    
+  # Stage 2: Segmentation Loss
+  stage2:
+    primary:
+      type: "dice"          # Dice Loss (handles class imbalance)
+      weight: 0.6
+      smooth: 1.0
+      
+    auxiliary:
+      type: "bce"           # Binary Cross-Entropy
+      weight: 0.4
+      pos_weight: 2.0       # Upweight positive class (water)
+      
+  # Combined Loss
+  total_weight_stage1: 0.3  # 30% generator loss
+  total_weight_stage2: 0.7  # 70% segmentation loss
+
+# ==============================================================================
+# Metrics
+# ==============================================================================
+
+metrics:
+  segmentation:
+    - "iou"                 # Intersection over Union
+    - "dice"                # Dice Coefficient
+    - "precision"
+    - "recall"
+    - "f1"
+    - "accuracy"
+    
+  generation:
+    - "mse"                 # Mean Squared Error
+    - "mae"                 # Mean Absolute Error
+    - "psnr"                # Peak Signal-to-Noise Ratio
+    - "ssim"                # Structural Similarity Index
+
+# ==============================================================================
+# Memory Profiling & Debugging
+# ==============================================================================
+
+profiling:
+  enabled: false
+  log_memory: true
+  log_frequency: 10         # Log every 10 batches
+  
+debug:
+  check_nan: true           # Check for NaN in outputs
+  check_finite: true        # Check for Inf in outputs
+  verbose: false
+
+# ==============================================================================
+# Hardware-Specific Optimizations
+# ==============================================================================
+
+hardware:
+  # CUDA Settings
+  cuda:
+    benchmark: true         # cuDNN auto-tuning (faster but uses more memory)
+    deterministic: false    # Non-deterministic ops for speed
+    
+  # Memory Management
+  memory:
+    max_split_size_mb: 512  # PyTorch memory allocator setting
+    empty_cache_frequency: 5  # Clear cache every N batches
+    
+  # DataLoader
+  dataloader:
+    num_workers: 2          # Reduced for low-RAM systems
+    pin_memory: true        # Faster CPU→GPU transfer
+    prefetch_factor: 2
+    persistent_workers: true
+
+# ==============================================================================
+# Inference Configuration
+# ==============================================================================
+
+inference:
+  batch_size: 1
+  device: "cuda"
+  mixed_precision: true
+  
+  # Test-Time Augmentation (Optional)
+  tta:
+    enabled: false
+    flips: ["horizontal", "vertical"]
+    rotations: [0, 90, 180, 270]
+    
+  # Post-Processing
+  postprocessing:
+    apply_crf: false        # Conditional Random Field smoothing
+    min_object_size: 100    # Remove small objects (pixels)
+    fill_holes: true        # Fill interior holes
+    
+  # Output Format
+  output:
+    format: "geotiff"       # GeoTIFF with spatial reference
+    dtype: "uint8"          # 0-255 for visualization
+    compress: "lzw"         # Lossless compression
+
+# ==============================================================================
+# Logging & Monitoring
+# ==============================================================================
+
+logging:
+  # Console Output
+  console:
+    level: "INFO"           # DEBUG, INFO, WARNING, ERROR
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    
+  # File Output
+  file:
+    enabled: true
+    path: "logs/training.log"
+    level: "DEBUG"
+    
+  # TensorBoard
+  tensorboard:
+    enabled: true
+    log_dir: "runs"
+    log_images: true
+    log_frequency: 10
+    
+  # Weights & Biases (Optional)
+  wandb:
+    enabled: false
+    project: "axion-sat"
+    entity: null
+    tags: ["lowvram", "water-segmentation"]
+
+# ==============================================================================
+# Notes
+# ==============================================================================
+
+# Memory Budget Estimates (RTX 4060, 12 GB VRAM):
+#   - Model weights (Stage 1 + 2): ~3.5 GB
+#   - Activations (batch_size=1): ~2.0 GB
+#   - Gradients: ~2.0 GB
+#   - Optimizer states: ~2.5 GB
+#   - PyTorch overhead: ~1.0 GB
+#   - Total: ~11.0 GB (safe margin for 12 GB GPU)
+#
+# For 8 GB GPUs (RTX 3060):
+#   - Set batch_size: 1, accumulation_steps: 8
+#   - Enable gradient_checkpointing: true
+#   - Consider freezing more layers (freeze_encoder: true)
+#   - Reduce patch_size to 96 if needed
+#
+# Performance Expectations:
+#   - Training speed: ~5-10 sec/batch (RTX 4060)
+#   - Inference speed: ~0.5-1.0 sec/image (128x128)
+#   - Memory usage: 10-11 GB peak (12 GB GPU)
+#   - Convergence: ~20-30 epochs for good results

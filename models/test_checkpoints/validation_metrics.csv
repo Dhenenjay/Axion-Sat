@@ -1,0 +1,2 @@
+step,epoch,ndvi_rmse_v2,evi_rmse_v2,sam_v2,ndvi_rmse_v1,evi_rmse_v1,sam_v1,mean_edge_displacement,max_edge_displacement,edge_ratio
+10000,10,0.065,0.07,0.13,0.085,0.095,0.18,1.5,3.5,0.85

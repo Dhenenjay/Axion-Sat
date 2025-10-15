@@ -1,0 +1,109 @@
+# ============================================================================
+# Black Configuration - Axion-Sat Project
+# The uncompromising Python code formatter
+# ============================================================================
+
+[tool.black]
+# Line length (matches Ruff configuration)
+line-length = 100
+
+# Target Python version
+target-version = ["py311"]
+
+# Include files matching this regex
+include = '\.pyi?$'
+
+# Exclude files/directories matching these patterns
+extend-exclude = '''
+/(
+    # Directories
+    \.git
+  | \.venv
+  | venv
+  | \.eggs
+  | \.hg
+  | \.mypy_cache
+  | \.pytest_cache
+  | \.ruff_cache
+  | \.tox
+  | build
+  | dist
+  | cache
+  | outputs
+  | weights
+  | data
+  | \.egg-info
+  | __pycache__
+  | \.ipynb_checkpoints
+  
+  # Files
+  | setup\.py
+)/
+'''
+
+# Enable preview features for better formatting
+# preview = true
+
+# Format code in docstrings
+# Disabled by default to avoid conflicts
+# Enable if you want formatted code examples in docstrings
+# experimental-string-processing = true
+
+# ============================================================================
+# Code Style Options
+# ============================================================================
+
+# Use double quotes for strings
+# (Black default, specified explicitly for clarity)
+# skip-string-normalization = false
+
+# Don't skip magic trailing commas
+# (Black will add trailing commas to multiline structures)
+# skip-magic-trailing-comma = false
+
+# ============================================================================
+# Import Sorting Compatibility
+# ============================================================================
+
+# Black is compatible with isort when isort is configured with:
+# - profile = "black"
+# - line_length = 100
+#
+# Import sorting is handled by Ruff (with isort rules) or isort itself
+# Black focuses purely on code formatting
+#
+# Recommended workflow:
+#   1. Run isort (or ruff --fix) for import sorting
+#   2. Run black for code formatting
+
+# ============================================================================
+# Usage Examples
+# ============================================================================
+
+# Format a single file:
+#   black vc_lib/module.py
+
+# Format entire directories:
+#   black vc_lib/ app/ tests/
+
+# Check formatting without making changes:
+#   black --check vc_lib/ app/ tests/
+
+# Show diff of what would change:
+#   black --diff vc_lib/ app/ tests/
+
+# Format specific Python version syntax:
+#   black --target-version py311 vc_lib/
+
+# ============================================================================
+# Integration with pre-commit
+# ============================================================================
+
+# Add to .pre-commit-config.yaml:
+#
+# - repo: https://github.com/psf/black
+#   rev: 25.9.0
+#   hooks:
+#     - id: black
+#       language_version: python3.11
+#       args: ["--config=.black.toml"]

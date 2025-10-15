@@ -1,0 +1,411 @@
+# configs/stac.endpoints.yaml
+# STAC API Endpoints and Collection Configuration
+#
+# This file defines STAC API endpoints and collection IDs for accessing
+# satellite imagery through various data providers.
+#
+# Usage:
+#   import yaml
+#   with open("configs/stac.endpoints.yaml") as f:
+#       config = yaml.safe_load(f)
+#   
+#   earthsearch_url = config['endpoints']['earthsearch']['url']
+#   s2_collection = config['endpoints']['earthsearch']['collections']['sentinel-2-l2a']
+
+# ==============================================================================
+# STAC API Endpoints
+# ==============================================================================
+
+endpoints:
+  # --------------------------------------------------------------------------
+  # Earth Search (Element 84) - AWS Open Data
+  # --------------------------------------------------------------------------
+  earthsearch:
+    name: "Earth Search by Element 84"
+    url: "https://earth-search.aws.element84.com/v1"
+    description: >
+      STAC API providing access to Sentinel-2 and Landsat data hosted on AWS.
+      Fast access for AWS-hosted compute (EC2, Lambda, SageMaker).
+    
+    provider: "Element 84"
+    region: "us-west-2"  # Primary AWS region
+    stac_version: "1.0.0"
+    
+    # Authentication
+    auth_required: false
+    
+    # Rate limits
+    rate_limit:
+      requests_per_second: 10
+      note: "Generous limits, no authentication required"
+    
+    # Collection IDs
+    collections:
+      sentinel-2-l2a:
+        id: "sentinel-2-l2a"
+        title: "Sentinel-2 Level-2A (Surface Reflectance)"
+        description: >
+          Sentinel-2 Level-2A (L2A) provides bottom-of-atmosphere (BOA) 
+          reflectance imagery with atmospheric correction applied.
+        bands:
+          - B01  # Coastal aerosol (60m)
+          - B02  # Blue (10m)
+          - B03  # Green (10m)
+          - B04  # Red (10m)
+          - B05  # Red Edge 1 (20m)
+          - B06  # Red Edge 2 (20m)
+          - B07  # Red Edge 3 (20m)
+          - B08  # NIR (10m)
+          - B8A  # NIR narrow (20m)
+          - B09  # Water vapor (60m)
+          - B11  # SWIR 1 (20m)
+          - B12  # SWIR 2 (20m)
+          - SCL  # Scene Classification Layer
+        spatial_resolution:
+          - 10m  # RGB, NIR
+          - 20m  # Red Edge, SWIR
+          - 60m  # Coastal, Water vapor
+        temporal_coverage: "2015-06-23 to present"
+        update_frequency: "Daily (5-day revisit)"
+      
+      sentinel-1-grd:
+        id: "sentinel-1-grd"
+        title: "Sentinel-1 Ground Range Detected (GRD)"
+        description: >
+          Sentinel-1 SAR imagery in Ground Range Detected (GRD) format.
+          Provides all-weather, day/night imaging capability.
+        bands:
+          - VV  # Vertical transmit, Vertical receive
+          - VH  # Vertical transmit, Horizontal receive
+          - HH  # Horizontal transmit, Horizontal receive (some modes)
+          - HV  # Horizontal transmit, Vertical receive (some modes)
+        spatial_resolution: "10m"
+        temporal_coverage: "2014-10-03 to present"
+        update_frequency: "Daily (6-12 day revisit depending on latitude)"
+      
+      landsat-c2-l2:
+        id: "landsat-c2-l2"
+        title: "Landsat Collection 2 Level-2"
+        description: "Landsat 8/9 Level-2 Surface Reflectance"
+        spatial_resolution: "30m"
+        temporal_coverage: "2013-03-18 to present"
+        update_frequency: "Daily (16-day revisit)"
+  
+  # --------------------------------------------------------------------------
+  # Microsoft Planetary Computer
+  # --------------------------------------------------------------------------
+  mpc:
+    name: "Microsoft Planetary Computer"
+    url: "https://planetarycomputer.microsoft.com/api/stac/v1"
+    description: >
+      Microsoft's STAC API providing access to petabytes of environmental
+      data including Sentinel, Landsat, MODIS, and more.
+    
+    provider: "Microsoft"
+    region: "westeurope"  # Azure West Europe
+    stac_version: "1.0.0"
+    
+    # Authentication
+    auth_required: false  # Read access is free
+    auth_note: >
+      Free read access to STAC metadata. Data access requires Azure Blob 
+      Storage credentials (free tier available).
+    
+    # API token (optional, for higher rate limits)
+    api_token_url: "https://planetarycomputer.microsoft.com/account/request"
+    
+    # Rate limits
+    rate_limit:
+      requests_per_second: 10
+      note: "Higher limits available with API token"
+    
+    # Collection IDs
+    collections:
+      sentinel-2-l2a:
+        id: "sentinel-2-l2a"
+        title: "Sentinel-2 Level-2A"
+        description: "Sentinel-2 L2A (bottom-of-atmosphere reflectance)"
+        bands:
+          - B01  # Coastal aerosol (60m)
+          - B02  # Blue (10m)
+          - B03  # Green (10m)
+          - B04  # Red (10m)
+          - B05  # Red Edge 1 (20m)
+          - B06  # Red Edge 2 (20m)
+          - B07  # Red Edge 3 (20m)
+          - B08  # NIR (10m)
+          - B8A  # NIR narrow (20m)
+          - B09  # Water vapor (60m)
+          - B11  # SWIR 1 (20m)
+          - B12  # SWIR 2 (20m)
+          - SCL  # Scene Classification Layer
+        spatial_resolution: "10m/20m/60m"
+        temporal_coverage: "2015-06-23 to present"
+      
+      sentinel-1-grd:
+        id: "sentinel-1-grd"
+        title: "Sentinel-1 GRD"
+        description: "Sentinel-1 SAR Ground Range Detected"
+        bands:
+          - VV  # Co-polarization
+          - VH  # Cross-polarization
+        spatial_resolution: "10m"
+        temporal_coverage: "2014-10-03 to present"
+      
+      landsat-c2-l2:
+        id: "landsat-c2-l2"
+        title: "Landsat Collection 2 Level-2"
+        description: "Landsat 8/9 surface reflectance"
+        spatial_resolution: "30m"
+        temporal_coverage: "2013-03-18 to present"
+      
+      modis:
+        id: "modis-43A4-061"
+        title: "MODIS MCD43A4"
+        description: "MODIS/Terra+Aqua BRDF-Adjusted Reflectance Daily"
+        spatial_resolution: "500m"
+        temporal_coverage: "2000-02-24 to present"
+  
+  # --------------------------------------------------------------------------
+  # NASA Earthdata LPCLOUD (HLS, Landsat, MODIS)
+  # --------------------------------------------------------------------------
+  lpcloud:
+    name: "NASA Earthdata Land Processes DAAC"
+    url: "https://cmr.earthdata.nasa.gov/stac/LPCLOUD"
+    description: >
+      NASA's STAC API for the Land Processes Distributed Active Archive Center.
+      Provides access to Harmonized Landsat Sentinel-2 (HLS), Landsat, MODIS,
+      ASTER, and ECOSTRESS data.
+    
+    provider: "NASA LP DAAC"
+    region: "us-west-2"  # AWS US West 2
+    stac_version: "1.0.0"
+    
+    # Authentication
+    auth_required: true
+    auth_type: "NASA Earthdata Login"
+    auth_url: "https://urs.earthdata.nasa.gov"
+    registration_url: "https://urs.earthdata.nasa.gov/users/new"
+    
+    # Rate limits
+    rate_limit:
+      requests_per_second: 10
+      note: "Requires Earthdata Login credentials"
+    
+    # Collection IDs
+    collections:
+      hls-l30:
+        id: "HLSL30.v2.0"
+        title: "HLS Landsat Operational Land Imager Surface Reflectance"
+        description: >
+          Harmonized Landsat Sentinel-2 (HLS) Landsat 8/9 OLI Surface 
+          Reflectance product. Harmonized to match Sentinel-2 spectral 
+          response and spatial resolution (30m).
+        bands:
+          - B01  # Coastal Aerosol (30m)
+          - B02  # Blue (30m)
+          - B03  # Green (30m)
+          - B04  # Red (30m)
+          - B05  # NIR (30m)
+          - B06  # SWIR 1 (30m)
+          - B07  # SWIR 2 (30m)
+          - Fmask  # Quality mask
+        spatial_resolution: "30m"
+        temporal_coverage: "2013-04-11 to present"
+        update_frequency: "Daily (16-day Landsat revisit)"
+        tile_system: "Military Grid Reference System (MGRS)"
+      
+      hls-s30:
+        id: "HLSS30.v2.0"
+        title: "HLS Sentinel-2 Multi-Spectral Instrument Surface Reflectance"
+        description: >
+          Harmonized Landsat Sentinel-2 (HLS) Sentinel-2 A/B MSI Surface
+          Reflectance product. Harmonized to 30m resolution to match Landsat.
+        bands:
+          - B01  # Coastal Aerosol (30m, resampled from 60m)
+          - B02  # Blue (30m, resampled from 10m)
+          - B03  # Green (30m, resampled from 10m)
+          - B04  # Red (30m, resampled from 10m)
+          - B05  # Red Edge 1 (30m, resampled from 20m)
+          - B06  # Red Edge 2 (30m, resampled from 20m)
+          - B07  # Red Edge 3 (30m, resampled from 20m)
+          - B08  # NIR Broad (30m, resampled from 10m)
+          - B8A  # NIR Narrow (30m, resampled from 20m)
+          - B09  # Water Vapor (30m, resampled from 60m)
+          - B10  # Cirrus (30m, resampled from 60m)
+          - B11  # SWIR 1 (30m, resampled from 20m)
+          - B12  # SWIR 2 (30m, resampled from 20m)
+          - Fmask  # Quality mask
+        spatial_resolution: "30m"
+        temporal_coverage: "2015-11-30 to present"
+        update_frequency: "Daily (5-day Sentinel-2 revisit)"
+        tile_system: "Military Grid Reference System (MGRS)"
+      
+      landsat-c2-l2:
+        id: "LANDSAT_OT_C2_L2"
+        title: "Landsat 8-9 Collection 2 Level-2"
+        description: "Landsat Operational Land Imager Surface Reflectance"
+        spatial_resolution: "30m"
+        temporal_coverage: "2013-03-18 to present"
+
+# ==============================================================================
+# Provider Comparison
+# ==============================================================================
+
+provider_comparison:
+  speed:
+    fastest: "earthsearch"
+    note: "AWS-hosted compute gets best performance from Earth Search"
+  
+  coverage:
+    sentinel-2:
+      - earthsearch  # Full archive
+      - mpc          # Full archive
+      - lpcloud      # Partial (HLS only, harmonized to 30m)
+    
+    sentinel-1:
+      - earthsearch  # Full archive
+      - mpc          # Full archive
+      - lpcloud      # Not available
+    
+    hls:
+      - lpcloud      # Full archive (ONLY source for HLS)
+  
+  authentication:
+    no_auth_required:
+      - earthsearch
+      - mpc
+    auth_required:
+      - lpcloud  # Requires NASA Earthdata Login
+
+# ==============================================================================
+# Recommended Usage
+# ==============================================================================
+
+recommendations:
+  sentinel-2:
+    primary: "earthsearch"
+    fallback: "mpc"
+    reason: "Best performance for AWS compute, no authentication required"
+  
+  sentinel-1:
+    primary: "earthsearch"
+    fallback: "mpc"
+    reason: "Comprehensive GRD archive, fast access"
+  
+  hls:
+    primary: "lpcloud"
+    fallback: null
+    reason: "Only source for Harmonized Landsat Sentinel-2 (30m harmonized)"
+  
+  multi_sensor:
+    strategy: >
+      Use Earth Search for Sentinel-1/2 (no auth), add LP DAAC for HLS if
+      30m harmonized data is needed (requires NASA Earthdata Login).
+
+# ==============================================================================
+# Collection ID Mapping (Cross-Provider)
+# ==============================================================================
+
+# Maps canonical names to provider-specific collection IDs
+collection_mapping:
+  sentinel-2-l2a:
+    earthsearch: "sentinel-2-l2a"
+    mpc: "sentinel-2-l2a"
+    lpcloud: null  # Use HLS instead
+  
+  sentinel-1-grd:
+    earthsearch: "sentinel-1-grd"
+    mpc: "sentinel-1-grd"
+    lpcloud: null  # Not available
+  
+  hls-landsat:
+    earthsearch: null  # Not available
+    mpc: null          # Not available
+    lpcloud: "HLSL30.v2.0"
+  
+  hls-sentinel2:
+    earthsearch: null  # Not available
+    mpc: null          # Not available
+    lpcloud: "HLSS30.v2.0"
+
+# ==============================================================================
+# Usage Examples
+# ==============================================================================
+
+examples:
+  python:
+    load_config: |
+      import yaml
+      with open("configs/stac.endpoints.yaml") as f:
+          config = yaml.safe_load(f)
+      
+      # Get Earth Search endpoint
+      earthsearch_url = config['endpoints']['earthsearch']['url']
+      s2_collection = config['endpoints']['earthsearch']['collections']['sentinel-2-l2a']['id']
+      
+      # Get MPC endpoint with auth note
+      mpc_url = config['endpoints']['mpc']['url']
+      auth_required = config['endpoints']['mpc']['auth_required']
+    
+    query_stac: |
+      import pystac_client
+      
+      # Connect to Earth Search
+      catalog = pystac_client.Client.open(config['endpoints']['earthsearch']['url'])
+      
+      # Search for Sentinel-2
+      search = catalog.search(
+          collections=['sentinel-2-l2a'],
+          bbox=[31.5, -1.5, 34.0, 0.5],  # Lake Victoria
+          datetime='2024-01-01/2024-12-31'
+      )
+      
+      items = list(search.items())
+
+# ==============================================================================
+# Notes
+# ==============================================================================
+
+notes:
+  - title: "HLS vs Native Sentinel-2"
+    content: >
+      HLS (Harmonized Landsat Sentinel-2) provides 30m resolution by resampling
+      native Sentinel-2 10m/20m bands. Use native Sentinel-2 (earthsearch/mpc)
+      for best spatial resolution, or HLS (lpcloud) for Landsat/Sentinel fusion.
+  
+  - title: "Authentication"
+    content: >
+      Earth Search and Microsoft Planetary Computer do not require authentication
+      for metadata access. NASA LP DAAC (LPCLOUD) requires NASA Earthdata Login.
+      Register at: https://urs.earthdata.nasa.gov/users/new
+  
+  - title: "Rate Limits"
+    content: >
+      All endpoints have rate limits (~10 requests/second). For production use,
+      implement exponential backoff and respect retry-after headers.
+  
+  - title: "Data Access"
+    content: >
+      STAC APIs provide metadata (item locations, properties). Actual data
+      download may require additional authentication (e.g., AWS credentials
+      for Earth Search, Azure SAS tokens for MPC).
+  
+  - title: "Cloud Optimized"
+    content: >
+      All endpoints serve Cloud Optimized GeoTIFFs (COGs) for efficient
+      partial reads. Use GDAL/rasterio with /vsicurl/ for streaming access.
+
+# ==============================================================================
+# Version History
+# ==============================================================================
+
+version: "1.0.0"
+last_updated: "2025-01-13"
+changelog:
+  - version: "1.0.0"
+    date: "2025-01-13"
+    changes:
+      - "Initial configuration"
+      - "Added Earth Search, Microsoft Planetary Computer, NASA LP DAAC"
+      - "Included Sentinel-1/2, Landsat, and HLS collection IDs"

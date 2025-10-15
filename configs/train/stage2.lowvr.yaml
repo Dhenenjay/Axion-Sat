@@ -1,0 +1,610 @@
+# ============================================================================
+# Stage 2 Training Configuration: Low VRAM (8-12 GB)
+# ============================================================================
+#
+# Optimized for Prithvi-EO-2.0-600M refinement with LoRA on consumer GPUs.
+#
+# Key Features:
+#   - LoRA rank 8 (parameter-efficient fine-tuning)
+#   - Last 4 transformer blocks unfrozen
+#   - Small ConvNeXt head (256 hidden dim, 4 blocks)
+#   - 8-bit quantization for backbone
+#   - Mixed precision (FP16) training
+#   - 20-40k training steps (~150-300 epochs on 160k tiles)
+#
+# Hardware Requirements:
+#   GPU:  8-12 GB VRAM (RTX 3060, RTX 4060 Ti, etc.)
+#   RAM:  16+ GB system RAM
+#   CPU:  6+ cores (for data loading)
+#   Disk: 50+ GB free (for tiles and checkpoints)
+#
+# Expected Training Time:
+#   - 20k steps: ~15-20 hours on RTX 3060
+#   - 40k steps: ~30-40 hours on RTX 3060
+#
+# Usage:
+#   python scripts/train_stage2.py \
+#       --config configs/train/stage2.lowvr.yaml \
+#       --data_dir data/tiles/benv2_catalog \
+#       --output_dir outputs/stage2_lowvr
+#
+# ============================================================================
+
+# ============================================================================
+# Model Architecture
+# ============================================================================
+
+model:
+  # Model name for identification
+  name: prithvi_refiner_lowvr
+  
+  # Architecture type
+  type: prithvi_lora_convnext
+  
+  # ========================================================================
+  # Prithvi Backbone Configuration
+  # ========================================================================
+  
+  prithvi:
+    # Model variant
+    model_name: prithvi_eo_600m
+    
+    # Pretrained checkpoint path (auto-downloaded if not specified)
+    checkpoint: null
+    
+    # Input/output dimensions
+    in_channels: 4        # opt_v1: [B02, B03, B04, B08]
+    out_channels: 256     # Feature dimension for ConvNeXt head
+    
+    # Image size (must match tile size)
+    img_size: 120         # BigEarthNet v2 tile size
+    
+    # Freeze configuration
+    freeze_backbone: true
+    unfreeze_last_n_blocks: 4    # Last 4 transformer blocks trainable
+    
+    # 8-bit quantization
+    load_in_8bit: true
+    quantization_config:
+      load_in_8bit: true
+      llm_int8_threshold: 6.0
+      llm_int8_has_fp16_weight: false
+  
+  # ========================================================================
+  # LoRA Configuration
+  # ========================================================================
+  
+  lora:
+    # Enable LoRA
+    use_lora: true
+    
+    # LoRA rank (r)
+    # Lower = less memory, less capacity
+    # Higher = more memory, more capacity
+    # 8 is a good balance for low VRAM
+    r: 8
+    
+    # LoRA alpha (scaling factor)
+    # Typically set to 2*r for stability
+    alpha: 16
+    
+    # LoRA dropout
+    dropout: 0.1
+    
+    # Target modules for LoRA adaptation
+    # Apply to attention layers for maximum impact
+    target_modules:
+      - qkv     # Query, Key, Value projections
+      - proj    # Output projections
+      - fc1     # MLP layer 1
+      - fc2     # MLP layer 2
+    
+    # Bias handling
+    bias: none
+    
+    # Task type
+    task_type: feature_extraction
+  
+  # ========================================================================
+  # ConvNeXt Refinement Head Configuration
+  # ========================================================================
+  
+  convnext_head:
+    # Input dimension from Prithvi backbone
+    in_channels: 768      # Prithvi-600M output dimension
+    
+    # Output dimension for Stage 3
+    out_channels: 256     # Dense features for conditional model
+    
+    # Hidden dimension
+    # Smaller = less memory, faster training
+    # Larger = more capacity, better quality
+    hidden_dim: 256       # Small head for low VRAM
+    
+    # Number of ConvNeXt blocks
+    # Fewer = less memory, faster
+    # More = better refinement
+    num_blocks: 4         # Balanced for quality and memory
+    
+    # ConvNeXt block configuration
+    kernel_size: 7        # Depthwise convolution kernel
+    expansion: 4          # Inverted bottleneck expansion factor
+    drop_path: 0.1        # Stochastic depth rate
+    
+    # Spatial downsampling
+    use_downsample: false # Keep full resolution
+  
+  # ========================================================================
+  # Metadata Conditioning
+  # ========================================================================
+  
+  metadata:
+    # Number of months (1-12)
+    num_months: 12
+    
+    # Number of biome categories (0-15)
+    num_biomes: 16
+    
+    # Embedding dimension
+    embed_dim: 64
+    
+    # Month encoding type
+    month_encoding: sinusoidal  # or "learnable"
+    
+    # Biome encoding type
+    biome_encoding: learnable   # Embedding table
+
+
+# ============================================================================
+# Training Configuration
+# ============================================================================
+
+training:
+  # ========================================================================
+  # Batch and Gradient Accumulation
+  # ========================================================================
+  
+  # Batch size per GPU
+  # Keep at 1 for low VRAM
+  batch_size: 1
+  
+  # Gradient accumulation steps
+  # Effective batch size = batch_size × grad_accum_steps = 1 × 8 = 8
+  grad_accum_steps: 8
+  
+  # Mixed precision training
+  # fp16: Fast, lower memory, slight accuracy trade-off
+  # bf16: Better stability, requires Ampere+ GPUs (RTX 30xx+)
+  # fp32: Full precision, not recommended for low VRAM
+  precision: fp16
+  
+  # Enable gradient checkpointing
+  # Trades compute for memory
+  gradient_checkpointing: false  # LoRA + 8-bit already save enough
+  
+  # Maximum gradient norm for clipping
+  max_grad_norm: 1.0
+  
+  # ========================================================================
+  # Training Steps and Epochs
+  # ========================================================================
+  
+  # Number of training steps
+  # 20k steps: Quick training, acceptable quality
+  # 30k steps: Recommended for production
+  # 40k steps: Maximum quality
+  max_steps: 30000
+  
+  # Alternatively, specify epochs
+  # (will be ignored if max_steps is set)
+  epochs: null
+  
+  # ========================================================================
+  # Learning Rate and Optimization
+  # ========================================================================
+  
+  # Learning rate
+  learning_rate: 1.0e-4
+  
+  # Learning rate scheduler
+  lr_scheduler:
+    type: cosine_with_warmup
+    
+    # Warmup steps (5% of total)
+    warmup_steps: 1500
+    
+    # Minimum learning rate (1% of initial)
+    min_lr: 1.0e-6
+    
+    # Cosine annealing
+    num_cycles: 0.5
+  
+  # Optimizer
+  optimizer:
+    type: adamw
+    
+    # Adam betas
+    betas: [0.9, 0.999]
+    
+    # Weight decay
+    weight_decay: 0.01
+    
+    # Epsilon
+    eps: 1.0e-8
+    
+    # Fused optimizer (faster on Ampere GPUs)
+    fused: false
+  
+  # ========================================================================
+  # Discriminator Training (for adversarial loss)
+  # ========================================================================
+  
+  discriminator:
+    # Update frequency (every N generator steps)
+    update_freq: 5
+    
+    # Learning rate (typically lower than generator)
+    lr_multiplier: 0.1
+    
+    # Number of discriminator updates per generator update
+    n_updates: 1
+  
+  # ========================================================================
+  # Checkpointing and Validation
+  # ========================================================================
+  
+  # Save checkpoint every N steps
+  checkpoint_interval: 2000
+  
+  # Validation frequency (every N steps)
+  validation_interval: 1000
+  
+  # Keep N best checkpoints
+  keep_best_n: 3
+  
+  # Keep all checkpoints (dangerous for disk space)
+  keep_all: false
+  
+  # Save optimizer state (larger files)
+  save_optimizer: true
+
+
+# ============================================================================
+# Loss Function Configuration
+# ============================================================================
+
+loss:
+  # ========================================================================
+  # Loss Component Weights
+  # ========================================================================
+  
+  # Spectral plausibility loss (NDVI/EVI/SAM)
+  spectral_weight: 1.0
+  
+  # Identity/edge-guard loss (L1 + edge preservation)
+  identity_weight: 0.5
+  
+  # Adversarial loss (PatchGAN)
+  # Keep low to avoid overwhelming spectral constraints
+  adversarial_weight: 0.05
+  
+  # ========================================================================
+  # Spectral Loss Configuration
+  # ========================================================================
+  
+  spectral:
+    # NDVI RMSE weight
+    ndvi_weight: 1.0
+    
+    # EVI RMSE weight
+    evi_weight: 0.5
+    
+    # Spectral Angle Mapper weight
+    sam_weight: 0.3
+    
+    # Use SAM loss
+    use_sam: true
+  
+  # ========================================================================
+  # Identity/Edge-Guard Loss Configuration
+  # ========================================================================
+  
+  identity:
+    # Identity loss weight (L1 distance)
+    identity_weight: 1.0
+    
+    # Edge preservation weight
+    edge_weight: 0.5
+    
+    # Edge detection threshold
+    edge_threshold: 0.1
+  
+  # ========================================================================
+  # PatchGAN Discriminator Configuration
+  # ========================================================================
+  
+  patchgan:
+    # Number of input channels
+    in_channels: 4
+    
+    # Base number of filters
+    base_filters: 32      # Small for low memory
+    
+    # Number of layers
+    num_layers: 4
+    
+    # Loss type
+    loss_type: lsgan      # Least-squares GAN (more stable)
+
+
+# ============================================================================
+# Data Configuration
+# ============================================================================
+
+data:
+  # Tile size
+  tile_size: 120
+  
+  # Number of data loader workers
+  num_workers: 2
+  
+  # Pin memory for faster GPU transfer
+  pin_memory: true
+  
+  # Prefetch factor (batches per worker)
+  prefetch_factor: 2
+  
+  # Dataset split ratios
+  splits:
+    train: 0.8
+    val: 0.15
+    test: 0.05
+  
+  # Data augmentation (training only)
+  augmentation:
+    # Random horizontal flip
+    hflip: true
+    hflip_prob: 0.5
+    
+    # Random vertical flip
+    vflip: true
+    vflip_prob: 0.5
+    
+    # Random 90-degree rotations
+    rotation: true
+    rotation_steps: [0, 1, 2, 3]  # 0°, 90°, 180°, 270°
+    
+    # Color jitter (disabled for spectral data)
+    color_jitter: false
+    
+    # Gaussian noise (mild)
+    gaussian_noise: true
+    noise_std: 0.01
+
+
+# ============================================================================
+# Memory Optimization
+# ============================================================================
+
+memory:
+  # Offload optimizer states to CPU
+  # Reduces GPU memory at cost of speed
+  cpu_offload: true
+  
+  # Empty CUDA cache after each step
+  # Helps prevent fragmentation
+  empty_cache: false
+  
+  # Use memory-efficient attention (xformers)
+  # Requires: pip install xformers
+  xformers: true
+  
+  # Enable channels_last memory format
+  # Can improve performance on modern GPUs
+  channels_last: true
+  
+  # Maximum memory fraction (0.0-1.0)
+  # Leave headroom for system
+  max_memory_fraction: 0.9
+  
+  # CPU fallback for refinement head (automatic)
+  cpu_fallback_enabled: true
+
+
+# ============================================================================
+# Logging and Monitoring
+# ============================================================================
+
+logging:
+  # Log directory
+  log_dir: logs/stage2_lowvr
+  
+  # Logging frequency (steps)
+  log_interval: 100
+  
+  # TensorBoard logging
+  tensorboard:
+    enabled: true
+    log_dir: logs/stage2_lowvr/tensorboard
+    
+    # Log histograms (memory intensive)
+    log_histograms: false
+    
+    # Log images (examples)
+    log_images: true
+    log_images_interval: 500
+  
+  # Weights & Biases logging
+  wandb:
+    enabled: false
+    project: axion-sat-stage2-lowvr
+    entity: null
+    tags: [stage2, lowvr, lora, prithvi]
+  
+  # Save sample predictions during training
+  save_samples: true
+  sample_interval: 1000
+
+
+# ============================================================================
+# Hardware Configuration
+# ============================================================================
+
+hardware:
+  # Device (auto-detect if null)
+  device: null  # Options: cuda, cpu, cuda:0, cuda:1
+  
+  # GPU index if multiple GPUs
+  gpu_id: 0
+  
+  # Enable cuDNN benchmark mode
+  # Can speed up training if input sizes consistent
+  cudnn_benchmark: true
+  
+  # Enable cuDNN deterministic mode
+  # Reproducibility at cost of performance
+  cudnn_deterministic: false
+  
+  # Number of CPU threads
+  num_threads: 4
+  
+  # Enable TF32 on Ampere+ GPUs (RTX 30xx+)
+  # Faster matmul with minimal accuracy impact
+  allow_tf32: true
+
+
+# ============================================================================
+# Validation Configuration
+# ============================================================================
+
+validation:
+  # Validation batch size
+  # Can be larger than training since no gradients
+  batch_size: 2
+  
+  # Number of validation batches
+  # Limit for faster validation
+  max_batches: 100
+  
+  # Metrics to compute
+  metrics:
+    - ndvi_rmse
+    - evi_rmse
+    - sam
+    - lpips
+    - edge_displacement
+    - psnr
+  
+  # Save validation predictions
+  save_predictions: true
+  num_predictions: 10
+
+
+# ============================================================================
+# Inference Configuration
+# ============================================================================
+
+inference:
+  # Batch size
+  batch_size: 4
+  
+  # Use mixed precision
+  use_amp: true
+  
+  # Use torch.compile (PyTorch 2.0+)
+  use_compile: false
+  
+  # Enable tiling for large images
+  enable_tiling: false
+  
+  # Tile overlap
+  tile_overlap: 64
+
+
+# ============================================================================
+# Expected Performance
+# ============================================================================
+
+# Expected Training Performance (RTX 3060 12GB):
+#   - Throughput: ~40-50 steps/sec
+#   - Time per 1k steps: ~20-25 minutes
+#   - 20k steps: ~6-8 hours
+#   - 30k steps: ~10-12 hours
+#   - 40k steps: ~13-17 hours
+#
+# Expected Validation Metrics (after 30k steps):
+#   - NDVI improvement: +0.015-0.025
+#   - EVI improvement: +0.020-0.030
+#   - SAM improvement: +0.040-0.060 rad
+#   - LPIPS (v2 vs v1): 0.10-0.15
+#   - Edge displacement: 0.8-1.5 px
+#
+# Expected Memory Usage:
+#   - Model parameters: ~200-250 MB
+#   - Activations + gradients: ~4-6 GB
+#   - Optimizer states (CPU): ~1-2 GB RAM
+#   - Peak VRAM: ~8-10 GB
+
+
+# ============================================================================
+# Notes
+# ============================================================================
+
+# Tuning Tips:
+# ------------
+# 1. If OOM errors occur:
+#    - Reduce batch_size to 1 (already minimal)
+#    - Increase grad_accum_steps to 16
+#    - Reduce convnext_head.hidden_dim to 128
+#    - Reduce convnext_head.num_blocks to 2
+#    - Set adversarial_weight to 0.0 (disable discriminator)
+#
+# 2. If training too slow:
+#    - Increase batch_size to 2 (if VRAM allows)
+#    - Reduce grad_accum_steps to 4
+#    - Set num_workers to 1
+#    - Disable save_samples during training
+#
+# 3. If quality insufficient:
+#    - Increase max_steps to 40000
+#    - Increase lora.r to 16
+#    - Increase convnext_head.hidden_dim to 384
+#    - Train longer with lower learning rate
+#
+# 4. Monitoring progress:
+#    - Watch validation NDVI/EVI RMSE (should decrease)
+#    - Watch SAM (should decrease)
+#    - Watch edge_displacement (should stay < 2px)
+#    - TensorBoard: tensorboard --logdir logs/stage2_lowvr/tensorboard
+
+
+# ============================================================================
+# Version and Compatibility
+# ============================================================================
+
+config_version: "1.0"
+created: "2025-10-14"
+last_updated: "2025-10-14"
+
+compatible_with:
+  axion_sat_version: ">=0.1.0"
+  pytorch_version: ">=2.0.0"
+  cuda_version: ">=11.8"
+  python_version: ">=3.8"
+
+dependencies:
+  required:
+    - torch>=2.0.0
+    - numpy
+    - pyyaml
+    - tqdm
+    - matplotlib
+    - scipy
+  
+  optional:
+    - bitsandbytes  # For 8-bit quantization
+    - peft          # For LoRA
+    - xformers      # For memory-efficient attention
+    - tensorboard   # For logging
+    - wandb         # For experiment tracking
+    - lpips         # For perceptual loss (fallback: simple version)

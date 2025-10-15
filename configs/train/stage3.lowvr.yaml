@@ -1,0 +1,281 @@
+# Stage 3 Training Configuration: Low VRAM Setup
+# 
+# This configuration is optimized for low VRAM GPUs (6-8 GB) using:
+# - LoRA fine-tuning (only cross-attention layers trainable)
+# - Mixed precision (FP16)
+# - Gradient accumulation
+# - Frozen base model
+#
+# Expected VRAM usage: 5-6 GB
+# Training time: ~2-3 hours on RTX 3060 (12GB)
+
+# ==============================================================================
+# Model Configuration
+# ==============================================================================
+model:
+  # Model architecture
+  name: "terramind_stage3"
+  timesteps: 10  # Diffusion timesteps (lower = faster, higher = better quality)
+  standardize: true  # Use TerraMind's pretrained normalization stats
+  pretrained: true  # Load pretrained TerraMind weights
+  
+  # LoRA configuration
+  lora:
+    enabled: true
+    rank: 8  # LoRA rank (lower = fewer parameters, faster)
+    alpha: 16  # LoRA scaling factor (typically 2 × rank)
+    dropout: 0.0  # LoRA dropout (0 = no dropout)
+    target_modules:
+      - "cross_attn"  # Cross-attention layers (SAR ↔ optical)
+      - "cross_attention"
+      - "ca_"
+      - "q_proj"  # Query projection
+      - "k_proj"  # Key projection
+      - "v_proj"  # Value projection
+      - "o_proj"  # Output projection
+    
+    # Freeze all parameters except LoRA adapters
+    freeze_base_model: true
+    
+  # Expected trainable parameters: ~1-2% of total model
+
+
+# ==============================================================================
+# Training Configuration
+# ==============================================================================
+training:
+  # Batch and accumulation
+  batch_size: 1  # Batch size per GPU (keep at 1 for low VRAM)
+  gradient_accumulation_steps: 8  # Effective batch size = 1 × 8 = 8
+  effective_batch_size: 8  # For reference only
+  
+  # Training duration
+  max_steps: 30000  # Maximum training steps (15k-30k recommended)
+  min_steps: 15000  # Minimum steps before early stopping
+  epochs: null  # Unused when max_steps is set
+  
+  # Checkpointing
+  save_every_n_steps: 1000  # Save checkpoint every N steps
+  validate_every_n_steps: 500  # Run validation every N steps
+  keep_last_n_checkpoints: 3  # Keep only last N checkpoints (saves disk space)
+  
+  # Early stopping
+  early_stopping:
+    enabled: true
+    metric: "sar_agreement"  # Monitor SAR agreement metric
+    patience: 5  # Number of validations without improvement
+    min_delta: 0.0001  # Minimum improvement threshold
+    mode: "max"  # Maximize SAR agreement
+  
+  # Mixed precision
+  mixed_precision: true  # Use FP16 (automatic mixed precision)
+  amp_dtype: "float16"  # AMP dtype: float16 or bfloat16
+  
+  # Gradient clipping
+  gradient_clip_norm: 1.0  # Clip gradients to prevent instability
+  
+  # Seed for reproducibility
+  seed: 42
+
+
+# ==============================================================================
+# Optimizer Configuration
+# ==============================================================================
+optimizer:
+  name: "adamw"
+  lr: 1.0e-4  # Learning rate (1e-4 is stable for LoRA)
+  weight_decay: 1.0e-5  # Weight decay for regularization
+  betas: [0.9, 0.999]  # Adam betas
+  eps: 1.0e-8  # Adam epsilon
+  
+  # Learning rate schedule
+  scheduler:
+    name: "cosine"  # Cosine annealing
+    warmup_steps: 500  # Linear warmup for first 500 steps
+    warmup_ratio: 0.0  # Alternative: ratio of total steps (0 = use warmup_steps)
+    min_lr: 1.0e-6  # Minimum learning rate at end of schedule
+    cosine_cycles: 1  # Number of cosine cycles
+
+
+# ==============================================================================
+# Loss Configuration
+# ==============================================================================
+loss:
+  # Loss components and weights
+  sar_consistency_weight: 1.0  # SAR edge + texture consistency
+  cycle_weight: 0.5  # Cycle consistency (minimize changes)
+  identity_weight: 0.3  # Identity preservation in low-SAR regions
+  lpips_weight: 0.1  # Perceptual loss (LPIPS)
+  spectral_weight: 1.0  # Pixel-level L1 loss
+  
+  # Total loss = α·SAR + β·Cycle + γ·Identity + δ·LPIPS + ε·Spectral
+  
+  # SAR consistency sub-components
+  sar_consistency:
+    edge_weight: 1.0  # Edge alignment weight
+    texture_weight: 0.5  # Texture correlation weight
+    adaptive_weighting: true  # Weight by SAR backscatter intensity
+  
+  # Use LPIPS if available (falls back to VGG if not installed)
+  use_lpips: true
+
+
+# ==============================================================================
+# Data Configuration
+# ==============================================================================
+data:
+  # Data directories (override with command-line args)
+  train_dir: "tiles/train"
+  val_dir: "tiles/val"
+  stage2_dir: null  # Pre-computed Stage 2 outputs (optional)
+  
+  # Data loading
+  tile_size: 120  # Expected tile size
+  num_workers: 0  # DataLoader workers (0 for Windows, auto-detect for Linux)
+  pin_memory: true  # Pin memory for faster GPU transfer
+  prefetch_factor: null  # Prefetch factor (null = default)
+  
+  # Augmentation
+  use_augmentation: true  # Apply augmentation during training
+  augmentation:
+    horizontal_flip: 0.5  # Probability of horizontal flip
+    vertical_flip: 0.5  # Probability of vertical flip
+    rotate_90: true  # Random 90-degree rotations
+  
+  # Validation
+  val_split: "val"  # Validation split name
+  val_max_samples: null  # Max validation samples (null = all)
+
+
+# ==============================================================================
+# Logging and Monitoring
+# ==============================================================================
+logging:
+  # Output directories
+  output_dir: "checkpoints/stage3_lowvr"
+  log_dir: "logs/stage3_lowvr"
+  
+  # Logging frequency
+  log_every_n_steps: 10  # Log metrics every N steps
+  log_to_console: true  # Print to console
+  log_to_file: true  # Save to file
+  
+  # Metrics to track
+  track_metrics:
+    - "loss/total"
+    - "loss/sar_consistency"
+    - "loss/cycle_identity"
+    - "loss/lpips"
+    - "loss/spectral"
+    - "sar_agreement"
+    - "lr"
+  
+  # Visualization
+  save_example_images: true  # Save example outputs during validation
+  num_example_images: 4  # Number of example images
+
+
+# ==============================================================================
+# Hardware Configuration
+# ==============================================================================
+hardware:
+  # Device
+  device: "cuda"  # cuda, cpu, or auto
+  cuda_device: 0  # CUDA device ID (if multiple GPUs)
+  
+  # Memory optimization
+  gradient_checkpointing: false  # Not needed with LoRA
+  cpu_offload: false  # Offload to CPU (not recommended with LoRA)
+  
+  # Dataloader
+  persistent_workers: false  # Keep workers alive (not supported on Windows)
+  
+  # Distributed training (not used for low VRAM setup)
+  distributed: false
+  world_size: 1
+  rank: 0
+
+
+# ==============================================================================
+# Validation Configuration
+# ==============================================================================
+validation:
+  # Validation metrics
+  compute_sar_agreement: true  # Compute SAR-optical edge agreement
+  compute_lpips: true  # Compute LPIPS change
+  lpips_threshold: 0.15  # LPIPS threshold for "good" samples
+  
+  # Validation frequency
+  every_n_steps: 500
+  
+  # Save validation outputs
+  save_outputs: false  # Don't save all validation outputs (saves disk space)
+  save_examples_only: true  # Only save example images
+  
+  # Number of validation samples
+  max_samples: null  # null = use all validation data
+
+
+# ==============================================================================
+# Resume Configuration
+# ==============================================================================
+resume:
+  # Resume from checkpoint
+  checkpoint_path: null  # Path to checkpoint (null = train from scratch)
+  resume_training: true  # Resume optimizer state and step counter
+  load_optimizer: true  # Load optimizer state
+  load_scheduler: true  # Load scheduler state
+  load_scaler: true  # Load AMP scaler state
+
+
+# ==============================================================================
+# Debugging Configuration
+# ==============================================================================
+debug:
+  # Debugging options
+  enabled: false
+  max_samples: 100  # Limit training samples for quick debugging
+  detect_anomaly: false  # Enable autograd anomaly detection (slow)
+  profile: false  # Enable profiling (slow)
+  
+  # Overfit test (for debugging)
+  overfit_single_batch: false
+  
+  # Validation
+  validate_before_training: false  # Run validation before training starts
+
+
+# ==============================================================================
+# Notes and Recommendations
+# ==============================================================================
+# 
+# Memory Usage (Estimated):
+# - Model (frozen): ~3.5 GB
+# - LoRA adapters: ~50 MB
+# - Gradients: ~200 MB
+# - Optimizer state: ~100 MB
+# - Activations (batch=1): ~1-1.5 GB
+# - Total: ~5-6 GB
+# 
+# Training Time (RTX 3060 12GB):
+# - 30k steps: ~2-3 hours
+# - ~150-200 samples/minute
+# - ~2500 steps/hour
+# 
+# Recommendations:
+# - Start with 15k steps, monitor SAR agreement
+# - If SAR agreement plateaus early, reduce learning rate
+# - If loss is unstable, reduce learning rate to 5e-5
+# - If VRAM is still too high, reduce tile_size to 96
+# 
+# Expected Results:
+# - SAR agreement improvement: +0.05 to +0.10
+# - LPIPS change: 0.08 to 0.12 (below threshold)
+# - Training loss: converges to 0.02-0.03
+# - Validation loss: 0.025-0.035
+# 
+# Hyperparameter Tuning:
+# - Increase sar_consistency_weight if SAR agreement is low
+# - Increase cycle/identity weight if changes are too drastic
+# - Decrease lpips_weight if perceptual quality degrades
+# - Adjust LoRA rank: 4 (faster), 8 (balanced), 16 (better quality)

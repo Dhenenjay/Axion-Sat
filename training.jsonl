@@ -1,0 +1,1 @@
+{"event": "training_start", "timestamp": "2025-10-14T13:50:34.551075", "start_time_unix": 1760475034.551076, "cuda_available": true, "cuda_device_count": 1, "cuda_device_name": "NVIDIA GeForce RTX 4050 Laptop GPU", "cuda_device_capability": [8, 9], "total_vram_gb": 6.438780928}

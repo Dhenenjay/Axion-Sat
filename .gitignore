@@ -1,0 +1,147 @@
+# ============================================================================
+# Axion-Sat Project .gitignore
+# ============================================================================
+
+# Python Virtual Environment
+.venv/
+venv/
+ENV/
+env/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyTorch
+*.pth
+*.pt
+*.ckpt
+lightning_logs/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb_checkpoints/
+.virtual_documents/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Data directories (raw data should not be committed)
+data/raw/
+data/raw/*
+data/tiles/
+data/tiles/*
+data/stage1_test/
+data/stage1_outputs/
+*.npz
+
+# Cache directories
+cache/
+cache/*
+.cache/
+
+# Temporary outputs
+outputs/_tmp/
+outputs/_tmp/*
+outputs/temp/
+outputs/temp/*
+
+# Logs
+logs/*.log
+*.log
+
+# Weights (large model files should use Git LFS or be downloaded separately)
+weights/*.pth
+weights/*.pt
+weights/*.ckpt
+weights/*.bin
+weights/*.safetensors
+
+# Machine-specific files
+.env
+.env.local
+*.local
+
+# OS-specific
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+*~
+
+# MLflow
+mlruns/
+.mlflow/
+
+# Tensorboard
+runs/
+tensorboard/
+
+# Pytest
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Profiling
+*.prof
+*.lprof
+
+# Large data files (use Git LFS if needed)
+*.tar.gz
+*.zip
+*.7z
+*.hdf5
+*.h5
+
+# Compiled files
+*.pyc
+*.pyo
+*.dll
+*.exe
+*.so
+*.dylib
+
+# Keep these directories but ignore their contents (except .gitkeep)
+cache/*
+!cache/.gitkeep
+outputs/_tmp/*
+!outputs/_tmp/.gitkeep
+data/raw/*
+!data/raw/.gitkeep

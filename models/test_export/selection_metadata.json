@@ -1,0 +1,285 @@
+{
+  "export_info": {
+    "timestamp": "2025-10-14T09:55:16.596043",
+    "selection_criteria": "spectral_improvement_and_edge_penalty",
+    "spectral_weight": 1.0,
+    "edge_penalty_weight": 10.0
+  },
+  "best_checkpoint": {
+    "checkpoint_path": "models\\test_checkpoints\\checkpoint_9000.pt",
+    "step": 9000,
+    "epoch": 9,
+    "metrics": {
+      "ndvi_rmse_v2": 0.06279671436669157,
+      "evi_rmse_v2": 0.0725208667435781,
+      "sam_v2": 0.12146192447079368,
+      "ndvi_rmse_v1": 0.085,
+      "evi_rmse_v1": 0.095,
+      "sam_v1": 0.18,
+      "mean_edge_displacement": 1.5275709477389605,
+      "max_edge_displacement": 4.142976183254806,
+      "edge_ratio": 0.7422132080255508
+    },
+    "improvements": {
+      "ndvi_improvement": 0.022203285633308437,
+      "evi_improvement": 0.022479133256421896,
+      "sam_improvement": 0.05853807552920631
+    },
+    "score": {
+      "composite_score": 0.07395145665433349,
+      "passes_hard_constraints": true
+    }
+  },
+  "all_checkpoints": [
+    {
+      "checkpoint_path": "models\\test_checkpoints\\checkpoint_1000.pt",
+      "step": 1000,
+      "epoch": 1,
+      "metrics": {
+        "ndvi_rmse_v2": 0.0747408860874493,
+        "evi_rmse_v2": 0.0734582358685608,
+        "sam_v2": 0.12956852425292653,
+        "ndvi_rmse_v1": 0.085,
+        "evi_rmse_v1": 0.095,
+        "sam_v1": 0.18,
+        "mean_edge_displacement": 1.1405104430517319,
+        "max_edge_displacement": 3.943708930008164,
+        "edge_ratio": 0.8184391629503788
+      },
+      "improvements": {
+        "ndvi_improvement": 0.010259113912550702,
+        "evi_improvement": 0.021541764131439198,
+        "sam_improvement": 0.05043147574707346
+      },
+      "score": {
+        "composite_score": 0.05701661591752663,
+        "passes_hard_constraints": true
+      }
+    },
+    {
+      "checkpoint_path": "models\\test_checkpoints\\checkpoint_2000.pt",
+      "step": 2000,
+      "epoch": 2,
+      "metrics": {
+        "ndvi_rmse_v2": 0.07112801304525157,
+        "evi_rmse_v2": 0.06542043581188595,
+        "sam_v2": 0.14005470961838662,
+        "ndvi_rmse_v1": 0.085,
+        "evi_rmse_v1": 0.095,
+        "sam_v1": 0.18,
+        "mean_edge_displacement": 1.7209864291021124,
+        "max_edge_displacement": 3.137018348045287,
+        "edge_ratio": 0.9066975317979717
+      },
+      "improvements": {
+        "ndvi_improvement": 0.013871986954748436,
+        "evi_improvement": 0.029579564188114055,
+        "sam_improvement": 0.039945290381613374
+      },
+      "score": {
+        "composite_score": 0.06342419633366918,
+        "passes_hard_constraints": true
+      }
+    },
+    {
+      "checkpoint_path": "models\\test_checkpoints\\checkpoint_3000.pt",
+      "step": 3000,
+      "epoch": 3,
+      "metrics": {
+        "ndvi_rmse_v2": 0.060121002939536775,
+        "evi_rmse_v2": 0.06792287852097834,
+        "sam_v2": 0.13559305021191415,
+        "ndvi_rmse_v1": 0.085,
+        "evi_rmse_v1": 0.095,
+        "sam_v1": 0.18,
+        "mean_edge_displacement": 2.0597299032304033,
+        "max_edge_displacement": 3.4500481344119556,
+        "edge_ratio": 0.7078902819584643
+      },
+      "improvements": {
+        "ndvi_improvement": 0.02487899706046323,
+        "evi_improvement": 0.027077121479021665,
+        "sam_improvement": 0.04440694978808585
+      },
+      "score": {
+        "composite_score": -5.8988307296068,
+        "passes_hard_constraints": false
+      }
+    },
+    {
+      "checkpoint_path": "models\\test_checkpoints\\checkpoint_4000.pt",
+      "step": 4000,
+      "epoch": 4,
+      "metrics": {
+        "ndvi_rmse_v2": 0.07214533875890955,
+        "evi_rmse_v2": 0.074853293412243,
+        "sam_v2": 0.1326790929644634,
+        "ndvi_rmse_v1": 0.085,
+        "evi_rmse_v1": 0.095,
+        "sam_v1": 0.18,
+        "mean_edge_displacement": 2.3119195813565847,
+        "max_edge_displacement": 4.114850840092541,
+        "edge_ratio": 0.7613673768947711
+      },
+      "improvements": {
+        "ndvi_improvement": 0.012854661241090456,
+        "evi_improvement": 0.020146706587756996,
+        "sam_improvement": 0.0473209070355366
+      },
+      "score": {
+        "composite_score": -31.135296314311855,
+        "passes_hard_constraints": false
+      }
+    },
+    {
+      "checkpoint_path": "models\\test_checkpoints\\checkpoint_5000.pt",
+      "step": 5000,
+      "epoch": 5,
+      "metrics": {
+        "ndvi_rmse_v2": 0.06285937257275631,
+        "evi_rmse_v2": 0.0795681260392623,
+        "sam_v2": 0.12903462222121387,
+        "ndvi_rmse_v1": 0.085,
+        "evi_rmse_v1": 0.095,
+        "sam_v1": 0.18,
+        "mean_edge_displacement": 0.865436688959342,
+        "max_edge_displacement": 2.654288996863876,
+        "edge_ratio": 0.7743349050696767
+      },
+      "improvements": {
+        "ndvi_improvement": 0.022140627427243695,
+        "evi_improvement": 0.015431873960737696,
+        "sam_improvement": 0.050965377778786125
+      },
+      "score": {
+        "composite_score": 0.06305519027737445,
+        "passes_hard_constraints": true
+      }
+    },
+    {
+      "checkpoint_path": "models\\test_checkpoints\\checkpoint_6000.pt",
+      "step": 6000,
+      "epoch": 6,
+      "metrics": {
+        "ndvi_rmse_v2": 0.06262277837052391,
+        "evi_rmse_v2": 0.0686198390460633,
+        "sam_v2": 0.13514094730811058,
+        "ndvi_rmse_v1": 0.085,
+        "evi_rmse_v1": 0.095,
+        "sam_v1": 0.18,
+        "mean_edge_displacement": 0.884670322323755,
+        "max_edge_displacement": 2.938625182398478,
+        "edge_ratio": 0.8988479232237316
+      },
+      "improvements": {
+        "ndvi_improvement": 0.0223772216294761,
+        "evi_improvement": 0.026380160953936707,
+        "sam_improvement": 0.04485905269188942
+      },
+      "score": {
+        "composite_score": 0.07118690892935751,
+        "passes_hard_constraints": true
+      }
+    },
+    {
+      "checkpoint_path": "models\\test_checkpoints\\checkpoint_7000.pt",
+      "step": 7000,
+      "epoch": 7,
+      "metrics": {
+        "ndvi_rmse_v2": 0.06978564477846237,
+        "evi_rmse_v2": 0.06777314105728338,
+        "sam_v2": 0.1439872479049466,
+        "ndvi_rmse_v1": 0.085,
+        "evi_rmse_v1": 0.095,
+        "sam_v1": 0.18,
+        "mean_edge_displacement": 1.6320349639383775,
+        "max_edge_displacement": 4.132213758547509,
+        "edge_ratio": 0.9140725993556567
+      },
+      "improvements": {
+        "ndvi_improvement": 0.015214355221537634,
+        "evi_improvement": 0.02722685894271662,
+        "sam_improvement": 0.03601275209505339
+      },
+      "score": {
+        "composite_score": 0.06044759021178095,
+        "passes_hard_constraints": true
+      }
+    },
+    {
+      "checkpoint_path": "models\\test_checkpoints\\checkpoint_8000.pt",
+      "step": 8000,
+      "epoch": 8,
+      "metrics": {
+        "ndvi_rmse_v2": 0.06462488664802139,
+        "evi_rmse_v2": 0.07278983739728756,
+        "sam_v2": 0.12180954645897835,
+        "ndvi_rmse_v1": 0.085,
+        "evi_rmse_v1": 0.095,
+        "sam_v1": 0.18,
+        "mean_edge_displacement": 1.6185721238806774,
+        "max_edge_displacement": 3.0989008097996606,
+        "edge_ratio": 0.7161397890067531
+      },
+      "improvements": {
+        "ndvi_improvement": 0.020375113351978613,
+        "evi_improvement": 0.02221016260271244,
+        "sam_improvement": 0.05819045354102165
+      },
+      "score": {
+        "composite_score": 0.07168050272520188,
+        "passes_hard_constraints": true
+      }
+    },
+    {
+      "checkpoint_path": "models\\test_checkpoints\\checkpoint_9000.pt",
+      "step": 9000,
+      "epoch": 9,
+      "metrics": {
+        "ndvi_rmse_v2": 0.06279671436669157,
+        "evi_rmse_v2": 0.0725208667435781,
+        "sam_v2": 0.12146192447079368,
+        "ndvi_rmse_v1": 0.085,
+        "evi_rmse_v1": 0.095,
+        "sam_v1": 0.18,
+        "mean_edge_displacement": 1.5275709477389605,
+        "max_edge_displacement": 4.142976183254806,
+        "edge_ratio": 0.7422132080255508
+      },
+      "improvements": {
+        "ndvi_improvement": 0.022203285633308437,
+        "evi_improvement": 0.022479133256421896,
+        "sam_improvement": 0.05853807552920631
+      },
+      "score": {
+        "composite_score": 0.07395145665433349,
+        "passes_hard_constraints": true
+      }
+    },
+    {
+      "checkpoint_path": "models\\test_checkpoints\\checkpoint_10000.pt",
+      "step": 10000,
+      "epoch": 10,
+      "metrics": {
+        "ndvi_rmse_v2": 0.06438133008220946,
+        "evi_rmse_v2": 0.06956661531459013,
+        "sam_v2": 0.1424608949059064,
+        "ndvi_rmse_v1": 0.085,
+        "evi_rmse_v1": 0.095,
+        "sam_v1": 0.18,
+        "mean_edge_displacement": 2.4843365917246127,
+        "max_edge_displacement": 5.468444670845775,
+        "edge_ratio": 0.9046050451806282
+      },
+      "improvements": {
+        "ndvi_improvement": 0.020618669917790544,
+        "evi_improvement": 0.02543338468540987,
+        "sam_improvement": 0.03753910509409358
+      },
+      "score": {
+        "composite_score": -71.79107110759979,
+        "passes_hard_constraints": false
+      }
+    }
+  ]
+}

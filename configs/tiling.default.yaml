@@ -1,0 +1,376 @@
+# ============================================================================
+# Axion-Sat Tiling Configuration - Default Settings
+# ============================================================================
+# This configuration file defines parameters for generating SAR-optical 
+# training tiles from Sentinel-1 and Sentinel-2 imagery.
+#
+# Usage:
+#   python tools/build_tiles.py --config configs/tiling.default.yaml
+#
+# Version: 1.0.0
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# Temporal Windows
+# ----------------------------------------------------------------------------
+# Controls how imagery is temporally aligned between SAR and optical sensors
+
+temporal:
+  # Date range for imagery acquisition
+  # Format: YYYY-MM-DD
+  start_date: "2020-01-01"
+  end_date: "2023-12-31"
+  
+  # Maximum temporal offset between SAR and optical acquisitions (days)
+  # Tiles are created only when SAR and optical images are acquired within
+  # this window. Smaller values ensure better temporal alignment but may
+  # reduce the number of valid tiles.
+  # Typical values: 1-7 days for agricultural areas, 3-14 for slow-changing regions
+  max_temporal_offset: 3
+  
+  # Minimum time gap between consecutive tiles from the same location (days)
+  # Prevents creating too many similar tiles from the same area.
+  # Set to 0 to allow all temporal combinations.
+  min_tile_spacing: 30
+
+
+# ----------------------------------------------------------------------------
+# Spatial Configuration
+# ----------------------------------------------------------------------------
+# Defines tile size, overlap, and spatial resolution
+
+spatial:
+  # Tile dimensions in pixels (height, width)
+  # Both SAR and optical bands will be resampled to this size
+  # Common values: [256, 256], [512, 512], [1024, 1024]
+  tile_size: [512, 512]
+  
+  # Target spatial resolution in meters per pixel
+  # All bands (SAR and optical) are resampled to this resolution
+  # Sentinel-2: 10m (RGB+NIR), 20m (RedEdge+SWIR), 60m (coastal/cirrus)
+  # Sentinel-1: ~10m (IW mode, multi-looked)
+  # Recommended: 10m for high-res applications, 20m for broader coverage
+  resolution: 10.0
+  
+  # Tile overlap as fraction of tile size (0.0 to 1.0)
+  # Example: 0.2 means 20% overlap between adjacent tiles
+  # Higher overlap provides more training samples but increases redundancy
+  # Set to 0.0 for non-overlapping tiles
+  overlap: 0.1
+  
+  # Coordinate Reference System (CRS) for output tiles
+  # Use UTM zones for the area of interest, or global projections
+  # "auto" will automatically select appropriate UTM zone per region
+  # Examples: "EPSG:32633" (UTM 33N), "EPSG:4326" (WGS84 lat/lon)
+  crs: "auto"
+
+
+# ----------------------------------------------------------------------------
+# Sentinel-1 SAR Configuration
+# ----------------------------------------------------------------------------
+# SAR-specific parameters for Sentinel-1 imagery
+
+sentinel1:
+  # Sentinel-1 bands to include in tiles
+  # Available: VV, VH (polarizations)
+  # VV: Co-polarization (vertical transmit, vertical receive)
+  # VH: Cross-polarization (vertical transmit, horizontal receive)
+  bands: ["VV", "VH"]
+  
+  # Orbit direction filter
+  # Options: "ASCENDING", "DESCENDING", "BOTH"
+  # Different orbits provide different viewing geometries
+  # Use "BOTH" for maximum coverage, single direction for consistency
+  orbit_direction: "BOTH"
+  
+  # Instrument mode
+  # Sentinel-1 options: "IW" (Interferometric Wide swath), "EW" (Extra Wide)
+  # IW is standard for land applications
+  instrument_mode: "IW"
+  
+  # Preprocessing options
+  preprocessing:
+    # Apply speckle filtering to reduce SAR noise
+    # Options: "none", "lee", "refined_lee", "gamma_map"
+    # Speckle filters smooth noise but may blur edges
+    speckle_filter: "refined_lee"
+    
+    # Speckle filter window size (pixels)
+    # Larger windows provide more smoothing but reduce spatial detail
+    # Typical values: 3, 5, 7
+    filter_window_size: 5
+    
+    # Convert to dB scale (decibels)
+    # Recommended: true for visualization and training
+    # dB scale: 10 * log10(linear_backscatter)
+    convert_to_db: true
+    
+    # Terrain correction
+    # Apply radiometric terrain correction using DEM
+    # Recommended: true for accurate backscatter values in mountainous areas
+    terrain_correction: true
+
+
+# ----------------------------------------------------------------------------
+# Sentinel-2 Optical Configuration
+# ----------------------------------------------------------------------------
+# Optical-specific parameters for Sentinel-2 imagery
+
+sentinel2:
+  # Sentinel-2 bands to include in tiles
+  # Band naming: B1-B12, plus B8A (narrow NIR)
+  # Resolution groups:
+  #   10m: B2 (Blue), B3 (Green), B4 (Red), B8 (NIR)
+  #   20m: B5 (RedEdge1), B6 (RedEdge2), B7 (RedEdge3), B8A (narrow NIR), 
+  #        B11 (SWIR1), B12 (SWIR2)
+  #   60m: B1 (Coastal), B9 (Water vapor), B10 (Cirrus)
+  bands: ["B2", "B3", "B4", "B5", "B6", "B7", "B8", "B8A", "B11", "B12"]
+  
+  # Maximum cloud coverage percentage (0-100)
+  # Tiles with cloud coverage exceeding this threshold are discarded
+  # Lower values ensure clearer imagery but reduce tile count
+  # Typical values: 10-30 for land applications
+  max_cloud_cover: 20
+  
+  # Maximum cloud shadow coverage percentage (0-100)
+  # Shadows can obscure surface features; strict threshold improves quality
+  max_shadow_cover: 10
+  
+  # Preprocessing options
+  preprocessing:
+    # Apply atmospheric correction
+    # Options: "none", "sen2cor", "doe" (dark object subtraction)
+    # sen2cor: ESA's official processor (Level-2A)
+    # Use "none" if data is already atmospherically corrected
+    atmospheric_correction: "sen2cor"
+    
+    # Apply cloud masking using Scene Classification Layer (SCL)
+    # Masks clouds, cloud shadows, and snow using Sentinel-2 SCL band
+    # Recommended: true for training data quality
+    cloud_masking: true
+    
+    # Apply topographic correction (illumination normalization)
+    # Reduces brightness variations due to terrain slope/aspect
+    # Useful in mountainous areas
+    topographic_correction: false
+
+
+# ----------------------------------------------------------------------------
+# Quality Filters
+# ----------------------------------------------------------------------------
+# Thresholds for tile quality control and validation
+
+quality:
+  # Minimum percentage of valid (non-NaN, non-masked) pixels required (0-100)
+  # Tiles with too many invalid pixels are discarded
+  # Invalid pixels arise from clouds, shadows, missing data, or tile edges
+  # Typical values: 70-95
+  min_valid_pixels: 80
+  
+  # Maximum percentage of saturated pixels allowed (0-100)
+  # Saturated pixels (digital number = max value) indicate overexposure
+  # Common in bright urban areas or snow/ice
+  max_saturated_pixels: 5
+  
+  # Minimum standard deviation across tile for each band
+  # Filters out homogeneous tiles (e.g., uniform water, desert)
+  # Set to 0.0 to disable
+  # Typical values: 0.01-0.1 for normalized data
+  min_std_per_band: 0.01
+  
+  # Check for SAR-optical co-registration quality
+  # Validates that SAR and optical data are spatially aligned
+  # Uses edge correlation metrics
+  check_alignment: true
+  
+  # Minimum correlation threshold for alignment check (0.0-1.0)
+  # Higher values ensure better alignment but may reject valid tiles
+  # Set to 0.0 to accept all alignments
+  min_alignment_score: 0.3
+
+
+# ----------------------------------------------------------------------------
+# Data Augmentation (Optional)
+# ----------------------------------------------------------------------------
+# Geometric and radiometric augmentation applied during tile generation
+# Note: Additional augmentation can be applied during training
+
+augmentation:
+  # Enable augmentation during tiling
+  # If false, all augmentation options below are ignored
+  enabled: false
+  
+  # Random rotation in degrees
+  # Tiles are randomly rotated by multiples of this value
+  # Common: 90 (0°, 90°, 180°, 270° rotations)
+  # Set to 0 to disable rotation
+  rotation_angle: 90
+  
+  # Random horizontal flip probability (0.0-1.0)
+  horizontal_flip: 0.5
+  
+  # Random vertical flip probability (0.0-1.0)
+  vertical_flip: 0.5
+  
+  # Brightness/contrast jitter for optical bands only
+  # Random adjustment range as fraction of original value
+  # Example: 0.1 means ±10% variation
+  # Set to 0.0 to disable
+  brightness_jitter: 0.0
+  contrast_jitter: 0.0
+
+
+# ----------------------------------------------------------------------------
+# Output Configuration
+# ----------------------------------------------------------------------------
+# File formats, compression, and organization
+
+output:
+  # Output directory for generated tiles
+  # Tiles are saved as compressed NumPy .npz files
+  output_dir: "data/tiles"
+  
+  # Tile filename pattern
+  # Available placeholders: {region}, {row}, {col}, {date}, {id}
+  # Example: "tile_r{row:05d}_c{col:05d}.npz" -> "tile_r00042_c00138.npz"
+  filename_pattern: "tile_r{row:05d}_c{col:05d}.npz"
+  
+  # Compression level for .npz files (0-9)
+  # Higher values reduce file size but increase processing time
+  # 0: no compression, 9: maximum compression
+  # Recommended: 6 for balance between size and speed
+  compression_level: 6
+  
+  # Save metadata alongside tiles
+  # Creates a .json file per tile with acquisition dates, coordinates, etc.
+  save_metadata: true
+  
+  # Save quicklook preview images (PNG format)
+  # Useful for visual inspection but increases storage requirements
+  # Quicklooks show RGB composite with SAR overlay
+  save_quicklooks: false
+  
+  # Organize tiles into train/val/test subdirectories
+  # If false, all tiles go into output_dir directly
+  split_into_subdirs: true
+
+
+# ----------------------------------------------------------------------------
+# Dataset Splitting
+# ----------------------------------------------------------------------------
+# Train/validation/test split configuration
+
+split:
+  # Split method
+  # Options:
+  #   "random": Random assignment (stratified by region if available)
+  #   "temporal": Split by acquisition date (earlier = train, later = test)
+  #   "spatial": Split by geographic region (requires region definitions)
+  method: "random"
+  
+  # Split ratios (must sum to 1.0)
+  # Typical ML splits: 70/15/15 or 80/10/10
+  train_ratio: 0.70
+  val_ratio: 0.15
+  test_ratio: 0.15
+  
+  # Random seed for reproducibility
+  # CRITICAL: This seed determines train/val/test split assignments
+  # - Set to a fixed integer (e.g., 42) for consistent, reproducible splits
+  # - Same seed + same tile order = identical split assignments every time
+  # - Change seed to get different split assignments with same ratios
+  # - Set to null for non-deterministic splits (not recommended for research)
+  # 
+  # The seed is automatically recorded in:
+  #   1. Manifest CSV columns: split_seed, split_config_hash, split_timestamp
+  #   2. Sidecar JSON file: <manifest>.split.json with full split config
+  #   3. Individual tile metadata JSON files
+  # 
+  # To verify reproducibility:
+  #   python -c "from axs_lib.split import DatasetSplitter; \
+  #              DatasetSplitter.verify_split('data/index/tiles.csv', expected_seed=42)"
+  random_seed: 42
+  
+  # Stratification (optional)
+  # Stratify splits to ensure balanced distribution across groups
+  # Example: stratify_by="region" ensures each region has similar train/val/test ratios
+  # Set to null to disable stratification
+  stratify_by: null
+  
+  # For temporal split: cutoff dates
+  # Tiles before val_date go to train, between val_date and test_date go to val,
+  # after test_date go to test
+  # Only used if method is "temporal"
+  temporal_split:
+    val_date: "2022-01-01"
+    test_date: "2023-01-01"
+  
+  # For spatial split: region definitions
+  # Define geographic regions and their split assignment
+  # Only used if method is "spatial"
+  spatial_split:
+    regions:
+      - name: "region_A"
+        split: "train"
+        bounds: [lon_min, lat_min, lon_max, lat_max]
+      - name: "region_B"
+        split: "val"
+        bounds: [lon_min, lat_min, lon_max, lat_max]
+
+
+# ----------------------------------------------------------------------------
+# Processing Configuration
+# ----------------------------------------------------------------------------
+# Parallelization and performance settings
+
+processing:
+  # Number of parallel workers for tile generation
+  # Set to -1 to use all available CPU cores
+  # Reduce if experiencing memory issues
+  num_workers: -1
+  
+  # Batch size for processing (number of tiles per batch)
+  # Larger batches improve throughput but require more memory
+  batch_size: 32
+  
+  # Enable progress bar
+  show_progress: true
+  
+  # Logging verbosity
+  # Options: "DEBUG", "INFO", "WARNING", "ERROR"
+  log_level: "INFO"
+  
+  # Maximum memory usage per worker (GB)
+  # Workers are restarted if they exceed this limit
+  # Set to 0 to disable memory limit
+  max_memory_per_worker: 8.0
+
+
+# ----------------------------------------------------------------------------
+# Advanced Options
+# ----------------------------------------------------------------------------
+# Expert-level settings for specialized use cases
+
+advanced:
+  # Coordinate precision for spatial indexing (decimal places)
+  # Higher precision enables finer spatial queries but increases index size
+  coord_precision: 6
+  
+  # Enable strict validation mode
+  # Performs additional checks on tile validity (slower but more robust)
+  strict_validation: false
+  
+  # Retry failed tiles with relaxed parameters
+  # Attempts to recover tiles that fail quality checks by relaxing thresholds
+  retry_failed_tiles: false
+  
+  # Cache intermediate products (reprojected scenes, etc.)
+  # Speeds up repeated runs but requires disk space
+  enable_caching: true
+  
+  # Cache directory
+  cache_dir: "data/cache"
+  
+  # Maximum cache size (GB)
+  # Oldest cached items are deleted when limit is exceeded
+  max_cache_size: 50.0

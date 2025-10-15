@@ -1,0 +1,235 @@
+# Stage 1 Training Configuration: Low VRAM (6GB GPU)
+#
+# Optimized for systems with 6GB VRAM (e.g., RTX 2060, GTX 1060 6GB, RTX 3060 Laptop)
+#
+# Key optimizations:
+#   - Reduced timesteps (10-12) for lower memory usage
+#   - Batch size 1 with gradient accumulation 8 (effective batch size = 8)
+#   - LoRA rank 8 (minimal trainable parameters)
+#   - Mixed precision (AMP fp16)
+#   - Moderate training duration (30-60k steps)
+#
+# Memory footprint: ~4.5-5.5 GB VRAM (leaves headroom for system)
+#
+# Usage:
+#   python scripts/train_stage1.py \
+#     --data-dir tiles/ \
+#     --output-dir runs/stage1_lowvr/ \
+#     --config configs/train/stage1.lowvr.yaml
+
+# ============================================================================
+# Model Configuration
+# ============================================================================
+model:
+  # Diffusion timesteps (lower = less memory, faster inference)
+  # Start with 10 for safety, can increase to 12 if stable
+  timesteps: 10
+  
+  # Standardization using TerraMind pretraining statistics
+  # IMPORTANT: Keep enabled (true) for best results
+  # Only disable if you have custom-normalized data
+  standardize: true
+  
+  # LoRA adapter settings
+  lora:
+    rank: 8            # Low rank = fewer parameters (~1-2% of model)
+    alpha: 16          # Scaling factor (typically 2*rank)
+    dropout: 0.0       # No dropout for stability
+    target_modules:    # Which layers to adapt
+      - proj
+      - q_proj
+      - k_proj
+      - v_proj
+      - o_proj
+      - cross_attn
+
+# ============================================================================
+# Data Configuration
+# ============================================================================
+data:
+  # Data directory (override with --data-dir)
+  data_dir: null
+  
+  # Validation split
+  val_split: 0.1
+  
+  # Tile size (None = use original size, or specify e.g. 256 to resize)
+  # Using None to avoid unnecessary resizing overhead
+  tile_size: null
+  
+  # Max tiles for quick testing (None = use all tiles)
+  max_tiles: null
+  
+  # Data augmentation
+  augment: true
+  
+  # Data loader settings
+  num_workers: 4
+  pin_memory: true
+
+# ============================================================================
+# Training Configuration
+# ============================================================================
+training:
+  # Training duration (step-based)
+  steps: 45000        # 45k steps (~middle of 30-60k range)
+  
+  # Batch configuration
+  batch_size: 1       # Per-GPU batch size (CRITICAL: keep at 1 for low VRAM)
+  grad_accum_steps: 8 # Gradient accumulation (effective batch = 1*8 = 8)
+  
+  # Optimizer settings
+  optimizer:
+    type: adamw
+    lr: 1.0e-4        # Learning rate (1e-4)
+    weight_decay: 0.01
+    betas: [0.9, 0.999]
+    eps: 1.0e-8
+  
+  # Learning rate schedule
+  scheduler:
+    type: cosine
+    warmup_steps: 500  # 500 step warmup (~1% of training)
+    min_lr: 1.0e-6     # Minimum LR at end of schedule
+  
+  # Gradient clipping
+  max_grad_norm: 1.0
+  
+  # Mixed precision training (CRITICAL for low VRAM)
+  use_amp: true
+  
+  # Gradient checkpointing (optional - enable if still OOM)
+  # gradient_checkpointing: false
+
+# ============================================================================
+# Loss Configuration
+# ============================================================================
+loss:
+  # Loss component weights
+  l1_weight: 1.0            # L1 reconstruction loss
+  ms_ssim_weight: 0.5       # Multi-scale SSIM (structure)
+  lpips_weight: 0.1         # Perceptual loss (LPIPS small model)
+  sar_structure_weight: 0.2 # SAR-guided structure loss
+
+# ============================================================================
+# Validation & Checkpointing
+# ============================================================================
+validation:
+  # Validation frequency
+  val_every: 1000     # Validate every 1000 steps
+  
+  # Validation batch size (can be same as training)
+  val_batch_size: 1
+
+checkpointing:
+  # Checkpoint save frequency
+  save_every: 2500    # Save every 2500 steps (~18 checkpoints total)
+  
+  # Keep N best checkpoints (by validation loss)
+  keep_best_n: 3
+  
+  # Keep N latest checkpoints
+  keep_last_n: 2
+  
+  # Save optimizer state (set to false to reduce checkpoint size)
+  save_optimizer: true
+
+# ============================================================================
+# Early Stopping
+# ============================================================================
+early_stopping:
+  # Enable early stopping
+  enabled: true
+  
+  # Monitor SAR-edge agreement (sar_structure loss)
+  metric: sar_edge_agreement
+  
+  # Patience: number of validations without improvement before stopping
+  patience: 5         # Stop after 5 validations (5000 steps) without improvement
+  
+  # Minimum delta: minimum change to qualify as improvement
+  min_delta: 0.0001   # 1e-4 threshold
+  
+  # Mode: 'min' because lower SAR-edge agreement is better
+  mode: min
+
+# Top-K checkpoints by SAR-edge agreement
+top_k_checkpoints:
+  # Number of best checkpoints to keep
+  k: 3
+  
+  # Save in separate directory
+  save_dir: checkpoints/top_k
+
+# ============================================================================
+# Output Directory
+# ============================================================================
+output:
+  # Output directory (override with --output-dir)
+  output_dir: null
+
+# ============================================================================
+# Logging
+# ============================================================================
+logging:
+  # Log frequency
+  log_every: 10       # Log metrics every 10 steps
+  
+  # Log file
+  log_file: training.jsonl
+  
+  # Print frequency
+  print_every: 100    # Print to console every 100 steps
+  
+  # GPU memory logging
+  log_gpu_memory: true
+  gpu_memory_every: 100  # Log GPU memory every 100 steps
+
+# ============================================================================
+# System
+# ============================================================================
+system:
+  # Device
+  device: cuda
+  
+  # Random seed
+  seed: 42
+  
+  # CUDA optimizations
+  cudnn_benchmark: true
+  cudnn_deterministic: false
+  
+  # OOM handling (automatic timestep reduction)
+  oom_handling:
+    enabled: true
+    min_timesteps: 4    # Don't reduce below 4 timesteps
+    reduction_step: 2   # Reduce by 2 each time (10→8→6→4)
+
+# ============================================================================
+# Notes & Tips
+# ============================================================================
+# 
+# Memory Optimization Tips:
+# --------------------------
+# 1. If still OOM, reduce timesteps to 8 or 6
+# 2. Enable gradient checkpointing (uncomment above)
+# 3. Reduce tile_size to 256 if using larger tiles
+# 4. Reduce num_workers to 2 if system RAM is low
+# 5. Close all other GPU applications
+#
+# Training Tips:
+# --------------
+# 1. Monitor GPU memory in first 100 steps - should be stable
+# 2. If timesteps get auto-reduced, consider restarting with lower initial value
+# 3. Expected training time: ~6-8 hours on RTX 2060 (45k steps)
+# 4. Validation loss should decrease steadily - if not, check data quality
+#
+# Quick Test Run:
+# ---------------
+# Use max_tiles: 100 and steps: 500 for a 5-minute test run to verify
+# everything works before full training.
+#
+# Resume Training:
+# ----------------
+# Add --resume runs/stage1_lowvr/checkpoints/checkpoint_step_XXXXX.pt
+# to continue from a checkpoint.

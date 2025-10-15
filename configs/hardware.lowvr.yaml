@@ -1,0 +1,447 @@
+# ============================================================================
+# hardware.lowvr.yaml - Low VRAM Hardware Configuration
+# ============================================================================
+#
+# This configuration is optimized for systems with limited GPU memory (8-12 GB).
+# It trades some training speed for memory efficiency through:
+#   - Smaller tile sizes
+#   - Gradient accumulation (effective larger batch size)
+#   - Mixed precision training (FP16)
+#   - CPU offloading of optimizer states
+#   - Memory-efficient attention (xformers)
+#   - Reduced model timesteps
+#   - Low-rank LoRA adaptation
+#
+# Recommended Hardware:
+#   GPU:  8-12 GB VRAM (RTX 3060, RTX 4060 Ti, etc.)
+#   RAM:  16+ GB system RAM
+#   CPU:  6+ cores (for CPU offloading)
+#
+# Usage:
+#   python vc_lib/training/train_stage1.py --config configs/hardware.lowvr.yaml
+#   python vc_lib/training/train_stage2.py --config configs/hardware.lowvr.yaml
+#   python vc_lib/training/train_stage3.py --config configs/hardware.lowvr.yaml
+#
+# ============================================================================
+
+# ============================================================================
+# Data Processing Configuration
+# ============================================================================
+
+data:
+  # Tile size for input images
+  # Smaller tiles = less memory usage, but more processing overhead
+  # 96x96 for ultra-low VRAM (6GB RTX 4050)
+  tile_size: 96
+  
+  # Tile overlap in pixels
+  # Used during inference to reduce edge artifacts
+  tile_overlap: 64
+  
+  # Number of data loader workers
+  # Reduce if CPU/RAM is limited
+  num_workers: 2
+  
+  # Pin memory for faster GPU transfer
+  # Disable if system RAM is very limited
+  pin_memory: true
+  
+  # Prefetch factor (batches to prefetch per worker)
+  prefetch_factor: 2
+
+
+# ============================================================================
+# Training Configuration
+# ============================================================================
+
+training:
+  # Batch size per GPU
+  # Keep at 1 for low VRAM, use gradient accumulation for effective larger batch
+  batch_size: 1
+  
+  # Gradient accumulation steps
+  # Effective batch size = batch_size × grad_accum_steps = 1 × 16 = 16
+  # This allows training with larger effective batch without memory issues
+  grad_accum_steps: 16
+  
+  # Mixed precision training
+  # fp16: Fast, lower memory, slight accuracy trade-off
+  # bf16: Better numeric stability, requires Ampere+ GPUs (RTX 30xx+)
+  # fp32: Full precision, not recommended for low VRAM
+  precision: fp16
+  
+  # Enable gradient checkpointing
+  # Trades compute for memory by recomputing activations during backward pass
+  gradient_checkpointing: true
+  
+  # Maximum gradient norm for clipping
+  # Helps stabilize training
+  max_grad_norm: 1.0
+  
+  # Number of training epochs
+  epochs: 100
+  
+  # Learning rate
+  learning_rate: 1.0e-4
+  
+  # Learning rate scheduler
+  lr_scheduler:
+    type: cosine_with_warmup
+    warmup_epochs: 5
+    min_lr: 1.0e-6
+  
+  # Optimizer settings
+  optimizer:
+    type: adamw
+    betas: [0.9, 0.999]
+    weight_decay: 0.01
+    eps: 1.0e-8
+  
+  # Save checkpoint every N epochs
+  checkpoint_interval: 10
+  
+  # Validation frequency (every N epochs)
+  validation_interval: 5
+
+
+# ============================================================================
+# Memory Optimization Settings
+# ============================================================================
+
+memory:
+  # Offload optimizer states to CPU
+  # Reduces GPU memory usage at the cost of some speed
+  cpu_offload: true
+  
+  # Empty cache after each training step
+  # Helps prevent fragmentation, slight performance overhead
+  empty_cache: false
+  
+  # Use memory-efficient attention (xformers)
+  # Significantly reduces memory usage for transformer models
+  # Requires: pip install xformers
+  xformers: true
+  
+  # Enable channels_last memory format
+  # Can improve performance on modern GPUs
+  channels_last: true
+  
+  # Maximum memory fraction to use (0.0-1.0)
+  # Leave some headroom for system/other processes
+  max_memory_fraction: 0.9
+
+
+# ============================================================================
+# Stage 1: TerraMind S1/S2 Feature Extraction
+# ============================================================================
+
+stage1:
+  # Model architecture
+  model:
+    name: terramind_s1_s2
+    
+    # TerraMind S1 (Sentinel-1 SAR)
+    tm_s1:
+      # Number of diffusion timesteps
+      # Fewer steps = less memory, faster, but potentially lower quality
+      timesteps: 12  # Reduced from 50 for low VRAM
+      
+      # Feature embedding dimension
+      embed_dim: 256
+      
+      # Number of attention heads
+      num_heads: 8
+      
+      # Dropout rate
+      dropout: 0.1
+    
+    # TerraMind S2 (Sentinel-2 Multispectral)
+    tm_s2:
+      # Number of diffusion timesteps
+      timesteps: 12  # Reduced from 50 for low VRAM
+      
+      # Feature embedding dimension
+      embed_dim: 256
+      
+      # Number of attention heads
+      num_heads: 8
+      
+      # Dropout rate
+      dropout: 0.1
+  
+  # Loss function weights
+  loss:
+    feature_loss_weight: 1.0
+    reconstruction_loss_weight: 0.5
+    perceptual_loss_weight: 0.1
+
+
+# ============================================================================
+# Stage 2: Prithvi Foundation Model Refinement
+# ============================================================================
+
+stage2:
+  # Model architecture
+  model:
+    name: prithvi_refiner
+    
+    # Use LoRA (Low-Rank Adaptation) for parameter-efficient fine-tuning
+    # This significantly reduces memory usage
+    use_lora: true
+    
+    # LoRA rank
+    # Lower rank = less memory, but may reduce model capacity
+    # Typical values: 4, 8, 16, 32
+    lora_r: 4
+    
+    # LoRA alpha (scaling factor)
+    lora_alpha: 16
+    
+    # LoRA dropout
+    lora_dropout: 0.1
+    
+    # Layers to apply LoRA to
+    lora_target_modules:
+      - qkv  # Attention query/key/value projections
+      - proj  # Output projections
+    
+    # Freeze base model parameters (only train LoRA adapters)
+    freeze_base: true
+    
+    # Prithvi-specific settings
+    prithvi:
+      # Pretrained checkpoint path
+      checkpoint: weights/prithvi_100M.pt
+      
+      # Number of input bands (from Stage 1 output)
+      in_channels: 4  # Blue, Green, Red, NIR
+      
+      # Number of output classes (must match target channels for Stage 2)
+      num_classes: 4  # Blue, Green, Red, NIR output
+      
+      # Image size (must match tile_size)
+      img_size: 96
+  
+  # Loss function
+  loss:
+    type: dice_focal
+    dice_weight: 0.7
+    focal_weight: 0.3
+    focal_alpha: 0.25
+    focal_gamma: 2.0
+
+
+# ============================================================================
+# Stage 3: TerraMind Conditional Grounding
+# ============================================================================
+
+stage3:
+  # Model architecture
+  model:
+    name: terramind_conditional
+    
+    # Conditional model settings
+    conditional:
+      # Number of diffusion timesteps
+      # Fewer steps for low VRAM
+      timesteps: 10  # Reduced from 50 for low VRAM
+      
+      # Condition on Stage 2 output
+      condition_on_mask: true
+      
+      # Condition on input imagery
+      condition_on_image: true
+      
+      # Feature embedding dimension
+      embed_dim: 256
+      
+      # Number of attention heads
+      num_heads: 8
+      
+      # Dropout rate
+      dropout: 0.1
+    
+    # Classifier-free guidance
+    # Improves quality at inference time
+    cfg:
+      enabled: true
+      scale: 3.0
+      dropout: 0.1
+  
+  # Loss function
+  loss:
+    type: weighted_ce_dice
+    ce_weight: 0.4
+    dice_weight: 0.6
+    class_weights: [1.0, 2.0]  # [background, vegetation]
+
+
+# ============================================================================
+# Inference Configuration
+# ============================================================================
+
+inference:
+  # Batch size for inference
+  # Can be slightly larger than training batch since no gradients
+  batch_size: 2
+  
+  # Use mixed precision for inference
+  use_amp: true
+  
+  # Use torch.compile for faster inference (PyTorch 2.0+)
+  # Requires compatible hardware
+  use_compile: false
+  
+  # Number of diffusion steps for inference
+  # Can be less than training for faster results
+  num_steps:
+    stage1: 8   # Reduced from training timesteps
+    stage3: 6   # Reduced from training timesteps
+  
+  # Enable tiling for large images
+  enable_tiling: true
+  
+  # Tile overlap for stitching
+  tile_overlap: 64
+
+
+# ============================================================================
+# Monitoring and Logging
+# ============================================================================
+
+logging:
+  # Log directory
+  log_dir: logs/lowvram
+  
+  # Logging frequency (steps)
+  log_interval: 100
+  
+  # TensorBoard logging
+  tensorboard:
+    enabled: true
+    log_dir: logs/lowvram/tensorboard
+  
+  # Weights & Biases logging
+  wandb:
+    enabled: false
+    project: axion-sat-lowvram
+    entity: null
+  
+  # Save sample predictions during training
+  save_samples: true
+  sample_interval: 500
+
+
+# ============================================================================
+# Hardware-Specific Settings
+# ============================================================================
+
+hardware:
+  # Device to use (auto-detect if not specified)
+  device: cuda  # Options: cuda, cpu, mps (Apple Silicon)
+  
+  # GPU index if multiple GPUs available
+  gpu_id: 0
+  
+  # Enable cuDNN benchmark mode
+  # Can improve performance if input sizes are consistent
+  cudnn_benchmark: true
+  
+  # Enable cuDNN deterministic mode
+  # Reproducible results at the cost of performance
+  cudnn_deterministic: false
+  
+  # Number of threads for CPU operations
+  num_threads: 4
+  
+  # Enable TF32 on Ampere GPUs (RTX 30xx+)
+  # Faster matmul with minimal accuracy impact
+  allow_tf32: true
+
+
+# ============================================================================
+# Augmentation Settings (for training)
+# ============================================================================
+
+augmentation:
+  # Random horizontal flip
+  hflip: true
+  hflip_prob: 0.5
+  
+  # Random vertical flip
+  vflip: true
+  vflip_prob: 0.5
+  
+  # Random rotation (degrees)
+  rotation: true
+  rotation_degrees: 15
+  
+  # Random brightness/contrast
+  color_jitter: true
+  brightness: 0.2
+  contrast: 0.2
+  saturation: 0.0
+  hue: 0.0
+  
+  # Random crop (disabled to preserve tile size)
+  random_crop: false
+  
+  # Gaussian noise
+  gaussian_noise: true
+  noise_std: 0.01
+
+
+# ============================================================================
+# Notes and Recommendations
+# ============================================================================
+
+# Performance Tips:
+# -----------------
+# 1. If still running out of memory:
+#    - Reduce tile_size to 256 or 320
+#    - Increase grad_accum_steps to 16
+#    - Set num_workers to 1
+#    - Disable augmentation during inference
+#
+# 2. If training is too slow:
+#    - Increase batch_size to 2 (if VRAM allows)
+#    - Reduce grad_accum_steps to 4
+#    - Disable gradient_checkpointing
+#    - Use bf16 instead of fp16 (if supported)
+#
+# 3. Memory usage hierarchy (most to least impact):
+#    - tile_size: 384 → 256 saves ~40% memory
+#    - batch_size: 2 → 1 saves 50% memory
+#    - gradient_checkpointing: saves ~30% memory
+#    - cpu_offload: saves ~20% memory
+#    - xformers: saves ~15% memory
+#
+# 4. Quality vs. Speed trade-offs:
+#    - timesteps: Higher = better quality, more memory/time
+#    - lora_r: Higher = more capacity, more memory
+#    - precision: fp32 > bf16 > fp16 (quality)
+#                 fp16 > bf16 > fp32 (speed)
+#
+# 5. Monitoring memory usage:
+#    - Use `nvidia-smi` or `watch -n 1 nvidia-smi`
+#    - Enable PyTorch memory profiler for detailed analysis
+#    - Check logs for "CUDA out of memory" errors
+
+# Expected Memory Usage (approximate):
+# -------------------------------------
+# Stage 1 (TerraMind S1/S2):  ~7-9 GB VRAM
+# Stage 2 (Prithvi + LoRA):   ~8-10 GB VRAM
+# Stage 3 (Conditional):      ~6-8 GB VRAM
+# Inference:                  ~4-6 GB VRAM
+
+# ============================================================================
+# Version Information
+# ============================================================================
+
+config_version: "1.0"
+created: "2025-10-13"
+last_updated: "2025-10-13"
+compatible_with:
+  axion_sat_version: ">=0.1.0"
+  pytorch_version: ">=2.0.0"
+  cuda_version: ">=11.8"
