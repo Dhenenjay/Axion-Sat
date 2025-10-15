@@ -166,6 +166,9 @@ def apply_lora_to_cross_attention(
         'o_proj',       # Output projection
     ]
     
+    # Get device of the module
+    device = next(module.parameters()).device
+    
     count = 0
     
     for name, submodule in module.named_modules():
@@ -191,7 +194,7 @@ def apply_lora_to_cross_attention(
             out_features=out_features,
             rank=rank,
             alpha=alpha
-        )
+        ).to(device)  # Move LoRA to same device as module
         
         # Attach LoRA as attribute
         setattr(submodule, 'lora_adapter', lora_layer)
