@@ -820,6 +820,8 @@ def main():
                        help='Use cross-attention model (better for PANGAEA benchmark)')
     parser.add_argument('--num-fusion-layers', type=int, default=2,
                        help='Number of cross-attention fusion layers (default: 2)')
+    parser.add_argument('--freeze-backbone', action='store_true', default=False,
+                       help='Freeze TerraMind backbone (only train decoder/fusion layers)')
     
     # Training arguments
     parser.add_argument('--batch-size', type=int, default=1,
@@ -903,7 +905,7 @@ def main():
     if args.use_crossattn:
         print("Using Cross-Attention model (PANGAEA-optimized)\n")
         model = build_stage3_crossattn_model(
-            freeze_backbone=False,  # Full fine-tuning
+            freeze_backbone=args.freeze_backbone,
             pretrained=args.pretrained,
             standardize=True,
             num_fusion_layers=args.num_fusion_layers,
@@ -912,7 +914,7 @@ def main():
     else:
         print("Using baseline model\n")
         model = build_stage3_backbone_model(
-            freeze_backbone=False,  # Full fine-tuning
+            freeze_backbone=args.freeze_backbone,
             pretrained=args.pretrained,
             standardize=True,
             device=device
