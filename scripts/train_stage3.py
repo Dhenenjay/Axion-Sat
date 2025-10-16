@@ -1096,22 +1096,22 @@ def main():
             best_sar_agreement = val_stats['sar_agreement']
         
         checkpoint_path = output_dir / f'checkpoint_epoch_{epoch + 1}.pt'
-        save_checkpoint(
-            {
-                'epoch': epoch,
-                'model_state_dict': model.state_dict(),
-                'optimizer_state_dict': optimizer.state_dict(),
-                'scheduler_state_dict': scheduler.state_dict(),
-                'scaler_state_dict': scaler.state_dict(),
-                'train_stats': train_stats,
-                'val_stats': val_stats,
-                'best_sar_agreement': best_sar_agreement,
-                'config': vars(args)
-            },
-            checkpoint_path,
-            is_best=is_best,
-            best_path=output_dir / 'best_model.pt'
-        )
+        state = {
+            'epoch': epoch,
+            'model_state_dict': model.state_dict(),
+            'optimizer_state_dict': optimizer.state_dict(),
+            'scheduler_state_dict': scheduler.state_dict(),
+            'scaler_state_dict': scaler.state_dict(),
+            'train_stats': train_stats,
+            'val_stats': val_stats,
+            'best_sar_agreement': best_sar_agreement,
+            'config': vars(args)
+        }
+        save_checkpoint(state, checkpoint_path)
+        
+        # Save best model separately
+        if is_best:
+            save_checkpoint(state, output_dir / 'best_model.pt')
         
         # Early stopping check
         if early_stopping(val_stats['sar_agreement'], epoch + 1):
