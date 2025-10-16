@@ -375,6 +375,10 @@ class Stage3BackboneModel(nn.Module):
         if isinstance(embeddings, dict):
             embeddings = torch.stack(list(embeddings.values()), dim=0).mean(dim=0)
         
+        # Handle list of embeddings (convert to tensor)
+        if isinstance(embeddings, (list, tuple)):
+            embeddings = torch.stack(embeddings, dim=0) if len(embeddings) > 1 else embeddings[0]
+        
         # Force embeddings to 3D: (B, num_patches, embed_dim)
         # Handle any unexpected dimensions
         while embeddings.ndim > 3:
