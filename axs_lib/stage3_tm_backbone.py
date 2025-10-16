@@ -366,6 +366,15 @@ class Stage3BackboneModel(nn.Module):
                 'S2L2A': opt_v2_std
             })
         
+        # Handle different return types from TerraMind
+        if isinstance(embeddings, dict):
+            # TerraMind might return dict with keys like 'embeddings' or modality names
+            embeddings = embeddings.get('embeddings', embeddings.get('S2L2A', embeddings.get('S1GRD', embeddings)))
+        
+        # If embeddings is still a dict after extraction, average all modality embeddings
+        if isinstance(embeddings, dict):
+            embeddings = torch.stack(list(embeddings.values()), dim=0).mean(dim=0)
+        
         # Decode embeddings to optical output
         output_std = self.decoder(embeddings)  # (B, 4, 224, 224)
         
