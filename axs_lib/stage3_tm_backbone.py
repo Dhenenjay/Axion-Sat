@@ -375,11 +375,19 @@ class Stage3BackboneModel(nn.Module):
         if isinstance(embeddings, dict):
             embeddings = torch.stack(list(embeddings.values()), dim=0).mean(dim=0)
         
-        # Handle 4D embeddings before passing to decoder
-        if isinstance(embeddings, torch.Tensor) and embeddings.ndim == 4:
-            # (B, num_modalities, num_patches, embed_dim) or similar
-            # Average over modality dimension (dim=1)
-            embeddings = embeddings.mean(dim=1)  # → (B, num_patches, embed_dim)
+        # Force embeddings to 3D: (B, num_patches, embed_dim)
+        # Handle any unexpected dimensions
+        while embeddings.ndim > 3:
+            # If 4D or higher, average or squeeze the extra dimensions
+            if embeddings.shape[0] == 1 and embeddings.ndim == 4:
+                # (1, B, num_patches, embed_dim) → (B, num_patches, embed_dim)
+                embeddings = embeddings.squeeze(0)
+            elif embeddings.shape[1] <= 4 and embeddings.ndim == 4:
+                # (B, num_modalities, num_patches, embed_dim) → (B, num_patches, embed_dim)
+                embeddings = embeddings.mean(dim=1)
+            else:
+                # Default: average over first extra dimension
+                embeddings = embeddings.mean(dim=0)
         
         # Decode embeddings to optical output
         output_std = self.decoder(embeddings)  # (B, 4, 224, 224)
