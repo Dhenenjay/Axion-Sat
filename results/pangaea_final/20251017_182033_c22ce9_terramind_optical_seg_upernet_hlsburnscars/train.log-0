@@ -1,0 +1,162 @@
+INFO - 10/17/25 18:20:33 - 0:00:00 - ============ Initialized logger ============
+INFO - 10/17/25 18:20:33 - 0:00:00 - 'batch_size': 8,
+                                      'ckpt_dir': None,
+                                      'criterion': {'_target_': 'torch.nn.CrossEntropyLoss',
+                                                    'ignore_index': '${dataset.ignore_index}'},
+                                      'data_replicate': 1,
+                                      'dataset': {'_target_': 'pangaea.datasets.hlsburnscars.HLSBurnScars',
+                                                  'auto_download': True,
+                                                  'bands': {'optical': ['B2', 'B3', 'B4', 'B8A', 'B11', 'B12']},
+                                                  'classes': ['Not burned', 'Burn scar'],
+                                                  'data_max': {'optical': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]},
+                                                  'data_mean': {'optical': [0.033349706741586264,
+                                                                            0.05701185520536176, 0.05889748132001316,
+                                                                            0.2323245113436119, 0.1972854853760658,
+                                                                            0.11944914225186566]},
+                                                  'data_min': {'optical': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]},
+                                                  'data_std': {'optical': [0.02269135568823774, 0.026807560223070237,
+                                                                           0.04004109844362779, 0.07791732423672691,
+                                                                           0.08708738838140137,
+                                                                           0.07241979477437814]},
+                                                  'dataset_name': 'HLSBurnScars',
+                                                  'distribution': [0.88889, 0.11111],
+                                                  'download_url': 'https://huggingface.co/datasets/ibm-nasa-geospatial/hls_burn_scars/resolve/main/hls_burn_scars.tar.gz?download=true',
+                                                  'ignore_index': -1,
+                                                  'img_size': 512,
+                                                  'multi_modal': False,
+                                                  'multi_temporal': False,
+                                                  'num_classes': 2,
+                                                  'root_path': './data/hlsburnscars'},
+                                      'decoder': {'_target_': 'pangaea.decoders.upernet.SegUPerNet',
+                                                  'channels': 512,
+                                                  'encoder': None,
+                                                  'finetune': '${finetune}',
+                                                  'num_classes': '${dataset.num_classes}'},
+                                      'encoder': {'_target_': 'pangaea.encoders.terramind_encoder.terramind_v1_large',
+                                                  'download_url': None,
+                                                  'encoder_weights': 'C:\\Users\\Dhenenjay\\Axion-Sat\\weights\\hf\\TerraMind-1.0-large\\TerraMind_v1_large.pt',
+                                                  'input_bands': {'optical': ['B1', 'B2', 'B3', 'B4', 'B5', 'B6',
+                                                                              'B7', 'B8', 'B8A', 'B10', 'B11',
+                                                                              'B12']},
+                                                  'input_size': 224,
+                                                  'merge_method': 'mean',
+                                                  'modalities': ['S2L2A'],
+                                                  'output_dim': 1024,
+                                                  'output_layers': [7, 11, 15, 23],
+                                                  'patch_size': 16},
+                                      'finetune': True,
+                                      'limited_label_strategy': 'stratified',
+                                      'limited_label_train': 1,
+                                      'limited_label_val': 1,
+                                      'lr_scheduler': {'_target_': 'pangaea.utils.schedulers.MultiStepLR',
+                                                       'lr_milestones': [0.6, 0.9],
+                                                       'optimizer': None,
+                                                       'total_iters': None},
+                                      'num_workers': 0,
+                                      'optimizer': {'_target_': 'torch.optim.AdamW',
+                                                    'betas': [0.9, 0.999],
+                                                    'lr': 0.0001,
+                                                    'params': None,
+                                                    'weight_decay': 0.05},
+                                      'preprocessing': {'test': {'_target_': 'pangaea.engine.data_preprocessor.Preprocessor',
+                                                                 'preprocessor_cfg': [{'_target_': 'pangaea.engine.data_preprocessor.BandFilter'},
+                                                                                      {'_target_': 'pangaea.engine.data_preprocessor.NormalizeMeanStd'},
+                                                                                      {'_target_': 'pangaea.engine.data_preprocessor.BandPadding'}]},
+                                                        'train': {'_target_': 'pangaea.engine.data_preprocessor.Preprocessor',
+                                                                  'preprocessor_cfg': [{'_target_': 'pangaea.engine.data_preprocessor.RandomCropToEncoder'},
+                                                                                       {'_target_': 'pangaea.engine.data_preprocessor.BandFilter'},
+                                                                                       {'_target_': 'pangaea.engine.data_preprocessor.NormalizeMeanStd'},
+                                                                                       {'_target_': 'pangaea.engine.data_preprocessor.BandPadding'}]},
+                                                        'val': {'_target_': 'pangaea.engine.data_preprocessor.Preprocessor',
+                                                                'preprocessor_cfg': [{'_target_': 'pangaea.engine.data_preprocessor.BandFilter'},
+                                                                                     {'_target_': 'pangaea.engine.data_preprocessor.NormalizeMeanStd'},
+                                                                                     {'_target_': 'pangaea.engine.data_preprocessor.BandPadding'}]}},
+                                      'seed': 234,
+                                      'stratification_bins': 3,
+                                      'task': {'evaluator': {'_target_': 'pangaea.engine.evaluator.SegEvaluator',
+                                                             'device': None,
+                                                             'exp_dir': None,
+                                                             'inference_mode': 'sliding',
+                                                             'sliding_inference_batch': 8,
+                                                             'use_wandb': '${use_wandb}',
+                                                             'val_loader': None},
+                                               'trainer': {'_target_': 'pangaea.engine.trainer.SegTrainer',
+                                                           'best_metric_key': 'mIoU',
+                                                           'ckpt_interval': 20,
+                                                           'criterion': None,
+                                                           'device': None,
+                                                           'eval_interval': 5,
+                                                           'evaluator': None,
+                                                           'exp_dir': None,
+                                                           'log_interval': 5,
+                                                           'lr_scheduler': None,
+                                                           'model': None,
+                                                           'n_epochs': 80,
+                                                           'optimizer': None,
+                                                           'precision': 'fp32',
+                                                           'train_loader': None,
+                                                           'use_wandb': '${use_wandb}'}},
+                                      'test_batch_size': 1,
+                                      'test_num_workers': 0,
+                                      'train': True,
+                                      'use_final_ckpt': False,
+                                      'use_multiscale': False,
+                                      'use_tta': False,
+                                      'use_wandb': False,
+                                      'wandb_run_id': None,
+                                      'work_dir': '../results/pangaea_final'
+INFO - 10/17/25 18:20:33 - 0:00:00 - The experiment is stored in ..\results\pangaea_final\20251017_182033_c22ce9_terramind_optical_seg_upernet_hlsburnscars
+                                     
+INFO - 10/17/25 18:20:33 - 0:00:00 - Device used: cuda:0
+INFO - 10/17/25 18:20:34 - 0:00:01 - A new version of Albumentations is available: 2.0.8 (you have 1.4.10). Upgrade using: pip install --upgrade albumentations
+WARNING - 10/17/25 18:20:38 - 0:00:06 - Missing keys in encoder_weights C:\Users\Dhenenjay\Axion-Sat\weights\hf\TerraMind-1.0-large\TerraMind_v1_large.pt: []
+INFO - 10/17/25 18:20:38 - 0:00:06 - Built terramind.
+INFO - 10/17/25 18:20:39 - 0:00:07 - Built UPerNet for with TerraMindViT encoder.
+INFO - 10/17/25 18:20:40 - 0:00:07 - Built HLSBurnScars dataset.
+INFO - 10/17/25 18:20:40 - 0:00:07 - Total number of train patches: 486
+                                     Total number of validation patches: 54
+                                     
+INFO - 10/17/25 18:20:58 - 0:00:25 - [val] ------- IoU --------
+                                     Not burned	 88.571
+                                     Burn scar 	  0.210
+                                     [val]-------------------
+                                     [val] Mean	 44.391
+INFO - 10/17/25 18:20:58 - 0:00:25 - [val] ------- F1-score --------
+                                     Not burned	 93.939
+                                     Burn scar 	  0.420
+                                     [val]-------------------
+                                     [val] Mean	 47.180
+INFO - 10/17/25 18:20:58 - 0:00:25 - [val] ------- Precision --------
+                                     Not burned	 98.549
+                                     Burn scar 	  0.237
+                                     [val]-------------------
+                                     [val] Mean	 49.393
+INFO - 10/17/25 18:20:58 - 0:00:25 - [val] ------- Recall --------
+                                     Not burned	 89.741
+                                     Burn scar 	  1.814
+                                     [val]-------------------
+                                     [val] Mean	 45.778
+INFO - 10/17/25 18:20:58 - 0:00:25 - Mean Accuracy: 88.574 
+                                     
+INFO - 10/17/25 18:20:59 - 0:00:26 - Epoch 0 | Training checkpoint saved at ..\results\pangaea_final\20251017_182033_c22ce9_terramind_optical_seg_upernet_hlsburnscars\checkpoint__best.pth
+INFO - 10/17/25 18:20:59 - 0:00:26 - ============ Starting epoch 0 ... ============
+INFO - 10/17/25 18:22:43 - 0:02:10 - Epoch [0-5/60]	ETA [26h15m29s|00h18m01s]	Time [19.655|0.214]	Loss 0.5554 (1.0981)	lr 1.000e-04
+                                      Training metrics: Acc  79.281 ( 63.484)	mAcc  79.108 ( 58.973)	mIoU  59.432 ( 40.903)
+INFO - 10/17/25 18:24:46 - 0:04:13 - Epoch [0-10/60]	ETA [30h16m20s|00h18m54s]	Time [22.693|0.225]	Loss 0.4348 (0.7829)	lr 1.000e-04
+                                      Training metrics: Acc  81.214 ( 71.447)	mAcc  74.645 ( 67.785)	mIoU  60.092 ( 51.420)
+INFO - 10/17/25 18:26:53 - 0:06:20 - Epoch [0-15/60]	ETA [31h17m27s|00h17m36s]	Time [23.483|0.228]	Loss 0.2253 (0.6440)	lr 1.000e-04
+                                      Training metrics: Acc  94.000 ( 76.438)	mAcc  90.401 ( 73.335)	mIoU  82.487 ( 57.568)
+INFO - 10/17/25 18:29:01 - 0:08:28 - Epoch [0-20/60]	ETA [32h00m59s|00h16m02s]	Time [24.054|0.234]	Loss 0.2029 (0.5620)	lr 1.000e-04
+                                      Training metrics: Acc  93.034 ( 79.328)	mAcc  87.787 ( 75.806)	mIoU  81.539 ( 61.826)
+INFO - 10/17/25 18:31:09 - 0:10:37 - Epoch [0-25/60]	ETA [32h24m48s|00h14m13s]	Time [24.378|0.236]	Loss 0.2762 (0.5079)	lr 1.000e-04
+                                      Training metrics: Acc  91.279 ( 81.446)	mAcc  86.951 ( 78.273)	mIoU  79.461 ( 64.695)
+INFO - 10/17/25 18:33:17 - 0:12:44 - Epoch [0-30/60]	ETA [32h39m13s|00h12m17s]	Time [24.585|0.238]	Loss 0.2379 (0.4736)	lr 1.000e-04
+                                      Training metrics: Acc  93.374 ( 82.903)	mAcc  92.245 ( 79.574)	mIoU  78.632 ( 65.825)
+INFO - 10/17/25 18:35:25 - 0:14:52 - Epoch [0-35/60]	ETA [32h49m00s|00h10m18s]	Time [24.734|0.239]	Loss 0.2783 (0.4458)	lr 1.000e-04
+                                      Training metrics: Acc  90.715 ( 84.095)	mAcc  83.789 ( 80.527)	mIoU  77.290 ( 67.467)
+INFO - 10/17/25 18:37:33 - 0:17:00 - Epoch [0-40/60]	ETA [32h55m28s|00h08m16s]	Time [24.842|0.239]	Loss 0.3009 (0.4198)	lr 1.000e-04
+                                      Training metrics: Acc  89.160 ( 84.993)	mAcc  84.636 ( 81.191)	mIoU  77.377 ( 68.838)
+INFO - 10/17/25 18:39:42 - 0:19:09 - Epoch [0-45/60]	ETA [33h02m15s|00h06m14s]	Time [24.953|0.239]	Loss 0.2212 (0.3988)	lr 1.000e-04
+                                      Training metrics: Acc  90.041 ( 85.695)	mAcc  84.425 ( 81.703)	mIoU  77.613 ( 69.814)
+INFO - 10/17/25 18:41:50 - 0:21:17 - Epoch [0-50/60]	ETA [33h05m20s|00h04m10s]	Time [25.019|0.238]	Loss 0.2799 (0.3897)	lr 1.000e-04
+                                      Training metrics: Acc  91.084 ( 86.029)	mAcc  89.583 ( 82.063)	mIoU  69.724 ( 69.970)

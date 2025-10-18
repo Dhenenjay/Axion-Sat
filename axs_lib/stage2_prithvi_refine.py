@@ -412,12 +412,17 @@ class PrithviRefiner(nn.Module):
         # ====================================================================
         
         print(f"Building ConvNeXt refinement head...")
+        
+        # Filter kwargs to only include valid ConvNeXt head arguments
+        convnext_valid_keys = {'kernel_size', 'expansion', 'drop_path', 'use_downsample'}
+        convnext_kwargs = {k: v for k, v in kwargs.items() if k in convnext_valid_keys}
+        
         self.refinement_head = ConvNeXtHead(
             in_channels=prithvi_out_dim,
             out_channels=out_channels,
             hidden_dim=hidden_dim,
             num_blocks=num_convnext_blocks,
-            **kwargs
+            **convnext_kwargs
         )
         print(f"✓ ConvNeXt head built")
         

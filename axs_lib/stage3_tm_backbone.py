@@ -136,7 +136,12 @@ class LightweightDecoder(nn.Module):
         self._init_weights()
     
     def _init_weights(self):
-        """Initialize weights with Kaiming initialization."""
+        """Initialize weights with Kaiming initialization.
+        
+        Special handling: Initialize final output layer to zero so that
+        initially the decoder outputs all zeros, making Stage 3 = Stage 1
+        at the start of training (residual connection).
+        """
         for m in self.modules():
             if isinstance(m, (nn.Conv2d, nn.ConvTranspose2d)):
                 nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
@@ -145,6 +150,12 @@ class LightweightDecoder(nn.Module):
             elif isinstance(m, nn.BatchNorm2d):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
+        
+        # Zero-initialize the final output projection
+        # This ensures Stage 3 starts from Stage 1 baseline (residual = 0)
+        nn.init.zeros_(self.output_proj.weight)
+        if self.output_proj.bias is not None:
+            nn.init.zeros_(self.output_proj.bias)
     
     def forward(self, embeddings: torch.Tensor) -> torch.Tensor:
         """
@@ -325,7 +336,8 @@ class Stage3BackboneModel(nn.Module):
         Returns:
             Grounded optical output (B, 4, H, W)
         """
-        # Store original spatial size
+        # Store original batch size and spatial size
+        B = s1.shape[0]
         orig_h, orig_w = s1.shape[2], s1.shape[3]
         
         # Standardize inputs
@@ -394,7 +406,16 @@ class Stage3BackboneModel(nn.Module):
                 embeddings = embeddings.mean(dim=0)
         
         # Decode embeddings to optical output
-        output_std = self.decoder(embeddings)  # (B, 4, 224, 224)
+        output_std = self.decoder(embeddings)  # Should be (B, 4, 224, 224)
+        
+        # Debug: check shape
+        if output_std.shape[0] != B:
+            # If decoder output has extra dimensions (e.g. timesteps), average them
+            if output_std.ndim == 4 and output_std.shape[0] > B:
+                # Likely shape: (timesteps * B, 4, H, W) → reshape and average
+                num_timesteps = output_std.shape[0] // B
+                output_std = output_std.view(num_timesteps, B, output_std.shape[1], output_std.shape[2], output_std.shape[3])
+                output_std = output_std.mean(dim=0)  # Average over timesteps
         
         # Crop output back to original size
         output_std = output_std[:, :, :orig_h, :orig_w]

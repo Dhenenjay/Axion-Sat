@@ -1,0 +1,12 @@
+{
+  "timestamp": "2025-10-17T00:54:25.064799",
+  "config": "Production Stage 1 (TerraMind + \u03b3=0.7)",
+  "results": [
+    {
+      "dataset": "hlsburnscars",
+      "success": false,
+      "score": null,
+      "target": 83.6
+    }
+  ]
+}

@@ -1,0 +1,363 @@
+INFO - 10/17/25 18:52:00 - 0:00:00 - ============ Initialized logger ============
+INFO - 10/17/25 18:52:00 - 0:00:00 - 'batch_size': 8,
+                                      'ckpt_dir': None,
+                                      'criterion': {'_target_': 'torch.nn.CrossEntropyLoss',
+                                                    'ignore_index': '${dataset.ignore_index}'},
+                                      'data_replicate': 1,
+                                      'dataset': {'_target_': 'pangaea.datasets.hlsburnscars.HLSBurnScars',
+                                                  'auto_download': True,
+                                                  'bands': {'optical': ['B2', 'B3', 'B4', 'B8A', 'B11', 'B12']},
+                                                  'classes': ['Not burned', 'Burn scar'],
+                                                  'data_max': {'optical': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]},
+                                                  'data_mean': {'optical': [0.033349706741586264,
+                                                                            0.05701185520536176, 0.05889748132001316,
+                                                                            0.2323245113436119, 0.1972854853760658,
+                                                                            0.11944914225186566]},
+                                                  'data_min': {'optical': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]},
+                                                  'data_std': {'optical': [0.02269135568823774, 0.026807560223070237,
+                                                                           0.04004109844362779, 0.07791732423672691,
+                                                                           0.08708738838140137,
+                                                                           0.07241979477437814]},
+                                                  'dataset_name': 'HLSBurnScars',
+                                                  'distribution': [0.88889, 0.11111],
+                                                  'download_url': 'https://huggingface.co/datasets/ibm-nasa-geospatial/hls_burn_scars/resolve/main/hls_burn_scars.tar.gz?download=true',
+                                                  'ignore_index': -1,
+                                                  'img_size': 512,
+                                                  'multi_modal': False,
+                                                  'multi_temporal': False,
+                                                  'num_classes': 2,
+                                                  'root_path': './data/hlsburnscars'},
+                                      'decoder': {'_target_': 'pangaea.decoders.pyramid_upernet.PyramidSegUPerNet',
+                                                  'channels': 512,
+                                                  'encoder': None,
+                                                  'finetune': '${finetune}',
+                                                  'num_classes': '${dataset.num_classes}',
+                                                  'scales': [0.5, 1.0, 2.0]},
+                                      'encoder': {'_target_': 'pangaea.encoders.terramind_encoder.terramind_v1_large',
+                                                  'download_url': None,
+                                                  'encoder_weights': 'C:\\Users\\Dhenenjay\\Axion-Sat\\weights\\hf\\TerraMind-1.0-large\\TerraMind_v1_large.pt',
+                                                  'input_bands': {'optical': ['B1', 'B2', 'B3', 'B4', 'B5', 'B6',
+                                                                              'B7', 'B8', 'B8A', 'B10', 'B11',
+                                                                              'B12']},
+                                                  'input_size': 224,
+                                                  'merge_method': 'mean',
+                                                  'modalities': ['S2L2A'],
+                                                  'output_dim': 1024,
+                                                  'output_layers': [7, 11, 15, 23],
+                                                  'patch_size': 16},
+                                      'finetune': False,
+                                      'limited_label_strategy': 'stratified',
+                                      'limited_label_train': 1,
+                                      'limited_label_val': 1,
+                                      'lr_scheduler': {'_target_': 'pangaea.utils.schedulers.MultiStepLR',
+                                                       'lr_milestones': [0.6, 0.9],
+                                                       'optimizer': None,
+                                                       'total_iters': None},
+                                      'num_workers': 0,
+                                      'optimizer': {'_target_': 'torch.optim.AdamW',
+                                                    'betas': [0.9, 0.999],
+                                                    'lr': 0.0001,
+                                                    'params': None,
+                                                    'weight_decay': 0.05},
+                                      'preprocessing': {'test': {'_target_': 'pangaea.engine.data_preprocessor.Preprocessor',
+                                                                 'preprocessor_cfg': [{'_target_': 'pangaea.engine.data_preprocessor.BandFilter'},
+                                                                                      {'_target_': 'pangaea.engine.data_preprocessor.NormalizeMeanStd'},
+                                                                                      {'_target_': 'pangaea.engine.data_preprocessor.BandPadding'}]},
+                                                        'train': {'_target_': 'pangaea.engine.data_preprocessor.Preprocessor',
+                                                                  'preprocessor_cfg': [{'_target_': 'pangaea.engine.data_preprocessor.RandomCropToEncoder'},
+                                                                                       {'_target_': 'pangaea.engine.data_preprocessor.BandFilter'},
+                                                                                       {'_target_': 'pangaea.engine.data_preprocessor.NormalizeMeanStd'},
+                                                                                       {'_target_': 'pangaea.engine.data_preprocessor.BandPadding'}]},
+                                                        'val': {'_target_': 'pangaea.engine.data_preprocessor.Preprocessor',
+                                                                'preprocessor_cfg': [{'_target_': 'pangaea.engine.data_preprocessor.BandFilter'},
+                                                                                     {'_target_': 'pangaea.engine.data_preprocessor.NormalizeMeanStd'},
+                                                                                     {'_target_': 'pangaea.engine.data_preprocessor.BandPadding'}]}},
+                                      'seed': 234,
+                                      'stratification_bins': 3,
+                                      'task': {'evaluator': {'_target_': 'pangaea.engine.evaluator.SegEvaluator',
+                                                             'device': None,
+                                                             'exp_dir': None,
+                                                             'inference_mode': 'sliding',
+                                                             'sliding_inference_batch': 8,
+                                                             'use_wandb': '${use_wandb}',
+                                                             'val_loader': None},
+                                               'trainer': {'_target_': 'pangaea.engine.trainer.SegTrainer',
+                                                           'best_metric_key': 'mIoU',
+                                                           'ckpt_interval': 20,
+                                                           'criterion': None,
+                                                           'device': None,
+                                                           'eval_interval': 5,
+                                                           'evaluator': None,
+                                                           'exp_dir': None,
+                                                           'log_interval': 5,
+                                                           'lr_scheduler': None,
+                                                           'model': None,
+                                                           'n_epochs': 80,
+                                                           'optimizer': None,
+                                                           'precision': 'fp32',
+                                                           'train_loader': None,
+                                                           'use_wandb': '${use_wandb}'}},
+                                      'test_batch_size': 1,
+                                      'test_num_workers': 0,
+                                      'train': True,
+                                      'use_final_ckpt': False,
+                                      'use_multiscale': False,
+                                      'use_tta': False,
+                                      'use_wandb': False,
+                                      'wandb_run_id': None,
+                                      'work_dir': '../results/pangaea_pyramid'
+INFO - 10/17/25 18:52:00 - 0:00:00 - The experiment is stored in ..\results\pangaea_pyramid\20251017_185200_bfc2b4_terramind_optical_seg_pyramid_upernet_hlsburnscars
+                                     
+INFO - 10/17/25 18:52:00 - 0:00:00 - Device used: cuda:0
+INFO - 10/17/25 18:52:00 - 0:00:01 - A new version of Albumentations is available: 2.0.8 (you have 1.4.10). Upgrade using: pip install --upgrade albumentations
+WARNING - 10/17/25 18:52:06 - 0:00:06 - Missing keys in encoder_weights C:\Users\Dhenenjay\Axion-Sat\weights\hf\TerraMind-1.0-large\TerraMind_v1_large.pt: []
+INFO - 10/17/25 18:52:06 - 0:00:06 - Built terramind.
+INFO - 10/17/25 18:52:07 - 0:00:07 - Built PyramidUPerNet for with TerraMindViT encoder.
+INFO - 10/17/25 18:52:07 - 0:00:08 - Built HLSBurnScars dataset.
+INFO - 10/17/25 18:52:07 - 0:00:08 - Total number of train patches: 486
+                                     Total number of validation patches: 54
+                                     
+INFO - 10/17/25 18:58:14 - 0:06:15 - [val] ------- IoU --------
+                                     Not burned	 11.373
+                                     Burn scar 	  9.887
+                                     [val]-------------------
+                                     [val] Mean	 10.630
+INFO - 10/17/25 18:58:14 - 0:06:15 - [val] ------- F1-score --------
+                                     Not burned	 20.424
+                                     Burn scar 	 17.995
+                                     [val]-------------------
+                                     [val] Mean	 19.209
+INFO - 10/17/25 18:58:14 - 0:06:15 - [val] ------- Precision --------
+                                     Not burned	 11.536
+                                     Burn scar 	 87.340
+                                     [val]-------------------
+                                     [val] Mean	 49.438
+INFO - 10/17/25 18:58:14 - 0:06:15 - [val] ------- Recall --------
+                                     Not burned	 88.974
+                                     Burn scar 	 10.031
+                                     [val]-------------------
+                                     [val] Mean	 49.502
+INFO - 10/17/25 18:58:14 - 0:06:15 - Mean Accuracy: 19.228 
+                                     
+INFO - 10/17/25 18:58:15 - 0:06:16 - Epoch 0 | Training checkpoint saved at ..\results\pangaea_pyramid\20251017_185200_bfc2b4_terramind_optical_seg_pyramid_upernet_hlsburnscars\checkpoint__best.pth
+INFO - 10/17/25 18:58:15 - 0:06:16 - ============ Starting epoch 0 ... ============
+INFO - 10/17/25 19:01:23 - 0:09:24 - Epoch [0-5/60]	ETA [52h52m36s|00h35m16s]	Time [38.474|0.271]	Loss 0.4590 (0.9411)	lr 1.000e-04
+                                      Training metrics: Acc  79.039 ( 63.093)	mAcc  73.680 ( 60.460)	mIoU  58.138 ( 41.006)
+INFO - 10/17/25 19:04:26 - 0:12:26 - Epoch [0-10/60]	ETA [51h06m09s|00h30m59s]	Time [37.181|0.255]	Loss 0.4397 (0.6970)	lr 1.000e-04
+                                      Training metrics: Acc  81.514 ( 72.806)	mAcc  77.117 ( 69.351)	mIoU  59.660 ( 52.962)
+INFO - 10/17/25 19:07:28 - 0:15:29 - Epoch [0-15/60]	ETA [50h50m09s|00h27m45s]	Time [37.019|0.250]	Loss 0.3350 (0.5893)	lr 1.000e-04
+                                      Training metrics: Acc  89.917 ( 77.524)	mAcc  79.357 ( 73.530)	mIoU  71.015 ( 58.597)
+INFO - 10/17/25 19:10:19 - 0:18:19 - Epoch [0-20/60]	ETA [49h32m26s|00h24m03s]	Time [36.083|0.248]	Loss 0.2466 (0.5398)	lr 1.000e-04
+                                      Training metrics: Acc  89.714 ( 79.280)	mAcc  84.361 ( 74.393)	mIoU  75.683 ( 60.889)
+INFO - 10/17/25 19:13:17 - 0:21:17 - Epoch [0-25/60]	ETA [49h21m51s|00h20m59s]	Time [35.988|0.246]	Loss 0.3083 (0.4869)	lr 1.000e-04
+                                      Training metrics: Acc  87.056 ( 81.459)	mAcc  82.639 ( 76.727)	mIoU  73.983 ( 63.998)
+INFO - 10/17/25 19:16:26 - 0:24:26 - Epoch [0-30/60]	ETA [49h45m22s|00h18m09s]	Time [36.321|0.244]	Loss 0.1838 (0.4646)	lr 1.000e-04
+                                      Training metrics: Acc  94.376 ( 82.559)	mAcc  92.514 ( 77.489)	mIoU  83.014 ( 64.402)
+INFO - 10/17/25 19:19:41 - 0:27:42 - Epoch [0-35/60]	ETA [50h07m42s|00h15m16s]	Time [36.640|0.239]	Loss 0.2307 (0.4452)	lr 1.000e-04
+                                      Training metrics: Acc  90.892 ( 83.225)	mAcc  86.439 ( 77.767)	mIoU  80.244 ( 65.024)
+INFO - 10/17/25 19:22:35 - 0:30:35 - Epoch [0-40/60]	ETA [49h52m45s|00h12m09s]	Time [36.490|0.224]	Loss 0.1889 (0.4273)	lr 1.000e-04
+                                      Training metrics: Acc  94.360 ( 83.749)	mAcc  91.705 ( 78.110)	mIoU  87.564 ( 65.683)
+INFO - 10/17/25 19:25:33 - 0:33:33 - Epoch [0-45/60]	ETA [49h45m46s|00h09m06s]	Time [36.441|0.212]	Loss 0.2946 (0.4100)	lr 1.000e-04
+                                      Training metrics: Acc  89.724 ( 84.421)	mAcc  79.628 ( 78.552)	mIoU  72.355 ( 66.238)
+INFO - 10/17/25 19:28:31 - 0:36:31 - Epoch [0-50/60]	ETA [49h36m30s|00h06m03s]	Time [36.362|0.202]	Loss 0.2327 (0.3953)	lr 1.000e-04
+                                      Training metrics: Acc  91.350 ( 85.061)	mAcc  81.659 ( 78.968)	mIoU  73.656 ( 67.023)
+INFO - 10/17/25 19:31:32 - 0:39:32 - Epoch [0-55/60]	ETA [49h28m10s|00h03m01s]	Time [36.295|0.199]	Loss 0.3241 (0.3877)	lr 1.000e-04
+                                      Training metrics: Acc  86.394 ( 85.489)	mAcc  74.548 ( 79.158)	mIoU  65.740 ( 67.413)
+INFO - 10/17/25 19:34:36 - 0:42:37 - Epoch [0-60/60]	ETA [49h24m23s|00h00m00s]	Time [36.285|0.202]	Loss 0.1921 (0.3832)	lr 1.000e-04
+                                      Training metrics: Acc  94.124 ( 85.696)	mAcc  90.077 ( 79.251)	mIoU  83.032 ( 67.779)
+INFO - 10/17/25 19:34:36 - 0:42:37 - ============ Starting epoch 1 ... ============
+INFO - 10/17/25 19:37:33 - 0:45:34 - Epoch [1-5/60]	ETA [49h09m10s|00h33m07s]	Time [36.131|0.189]	Loss 0.1669 (0.3263)	lr 1.000e-04
+                                      Training metrics: Acc  93.790 ( 86.059)	mAcc  92.737 ( 79.809)	mIoU  84.339 ( 68.345)
+INFO - 10/17/25 19:40:37 - 0:48:38 - Epoch [1-10/60]	ETA [49h05m27s|00h30m06s]	Time [36.122|0.178]	Loss 0.2069 (0.3069)	lr 1.000e-04
+                                      Training metrics: Acc  91.567 ( 86.404)	mAcc  86.018 ( 80.237)	mIoU  77.033 ( 69.090)
+INFO - 10/17/25 19:43:35 - 0:51:35 - Epoch [1-15/60]	ETA [49h03m01s|00h27m05s]	Time [36.129|0.167]	Loss 0.1599 (0.2911)	lr 1.000e-04
+                                      Training metrics: Acc  95.431 ( 86.924)	mAcc  90.518 ( 80.974)	mIoU  84.108 ( 70.078)
+INFO - 10/17/25 19:46:33 - 0:54:34 - Epoch [1-20/60]	ETA [49h13m51s|00h24m12s]	Time [36.305|0.156]	Loss 0.1813 (0.2738)	lr 1.000e-04
+                                      Training metrics: Acc  92.563 ( 87.260)	mAcc  87.992 ( 81.426)	mIoU  80.969 ( 70.805)
+INFO - 10/17/25 19:49:33 - 0:57:34 - Epoch [1-25/60]	ETA [49h10m39s|00h21m10s]	Time [36.303|0.146]	Loss 0.2404 (0.2722)	lr 1.000e-04
+                                      Training metrics: Acc  88.902 ( 87.454)	mAcc  85.053 ( 81.823)	mIoU  77.241 ( 71.074)
+INFO - 10/17/25 19:52:38 - 1:00:38 - Epoch [1-30/60]	ETA [48h55m22s|00h18m04s]	Time [36.147|0.135]	Loss 0.1095 (0.2656)	lr 1.000e-04
+                                      Training metrics: Acc  96.297 ( 87.633)	mAcc  95.923 ( 82.053)	mIoU  89.029 ( 71.174)
+INFO - 10/17/25 19:55:35 - 1:03:36 - Epoch [1-35/60]	ETA [48h41m35s|00h15m00s]	Time [36.009|0.127]	Loss 0.1597 (0.2548)	lr 1.000e-04
+                                      Training metrics: Acc  93.229 ( 87.930)	mAcc  85.502 ( 82.413)	mIoU  80.384 ( 71.564)
+INFO - 10/17/25 19:58:34 - 1:06:34 - Epoch [1-40/60]	ETA [48h39m28s|00h12m00s]	Time [36.021|0.126]	Loss 0.3626 (0.2548)	lr 1.000e-04
+                                      Training metrics: Acc  85.379 ( 87.912)	mAcc  81.073 ( 82.349)	mIoU  71.433 ( 71.541)
+INFO - 10/17/25 20:01:34 - 1:09:34 - Epoch [1-45/60]	ETA [48h33m30s|00h08m59s]	Time [35.983|0.126]	Loss 0.2315 (0.2515)	lr 1.000e-04
+                                      Training metrics: Acc  90.492 ( 89.288)	mAcc  82.557 ( 83.516)	mIoU  76.461 ( 73.255)
+INFO - 10/17/25 20:04:38 - 1:12:38 - Epoch [1-50/60]	ETA [48h32m52s|00h06m00s]	Time [36.013|0.126]	Loss 0.2088 (0.2498)	lr 1.000e-04
+                                      Training metrics: Acc  92.587 ( 89.716)	mAcc  88.092 ( 83.856)	mIoU  73.152 ( 73.737)
+INFO - 10/17/25 20:07:36 - 1:15:36 - Epoch [1-55/60]	ETA [48h37m34s|00h03m00s]	Time [36.112|0.120]	Loss 0.2096 (0.2458)	lr 1.000e-04
+                                      Training metrics: Acc  91.920 ( 89.841)	mAcc  82.660 ( 83.878)	mIoU  76.764 ( 73.886)
+INFO - 10/17/25 20:10:34 - 1:18:34 - Epoch [1-60/60]	ETA [48h30m43s|00h00m00s]	Time [36.063|0.110]	Loss 0.1372 (0.2400)	lr 1.000e-04
+                                      Training metrics: Acc  95.651 ( 90.061)	mAcc  90.852 ( 84.054)	mIoU  87.505 ( 74.148)
+INFO - 10/17/25 20:10:34 - 1:18:34 - ============ Starting epoch 2 ... ============
+INFO - 10/17/25 20:13:38 - 1:21:38 - Epoch [2-5/60]	ETA [48h31m51s|00h33m06s]	Time [36.115|0.110]	Loss 0.1838 (0.2369)	lr 1.000e-04
+                                      Training metrics: Acc  92.808 ( 90.113)	mAcc  90.123 ( 84.071)	mIoU  83.233 ( 74.190)
+INFO - 10/17/25 20:16:36 - 1:24:36 - Epoch [2-10/60]	ETA [48h25m41s|00h30m03s]	Time [36.075|0.111]	Loss 0.1861 (0.2346)	lr 1.000e-04
+                                      Training metrics: Acc  92.503 ( 90.347)	mAcc  87.904 ( 84.475)	mIoU  78.922 ( 74.994)
+INFO - 10/17/25 20:19:36 - 1:27:36 - Epoch [2-15/60]	ETA [48h14m42s|00h26m58s]	Time [35.972|0.110]	Loss 0.2324 (0.2340)	lr 1.000e-04
+                                      Training metrics: Acc  91.906 ( 90.663)	mAcc  86.700 ( 85.010)	mIoU  74.944 ( 75.688)
+INFO - 10/17/25 20:22:40 - 1:30:40 - Epoch [2-20/60]	ETA [48h14m52s|00h24m00s]	Time [36.013|0.110]	Loss 0.2749 (0.2381)	lr 1.000e-04
+                                      Training metrics: Acc  88.404 ( 90.822)	mAcc  82.543 ( 85.256)	mIoU  72.743 ( 76.080)
+INFO - 10/17/25 20:25:38 - 1:33:38 - Epoch [2-25/60]	ETA [48h19m40s|00h21m03s]	Time [36.114|0.109]	Loss 0.2594 (0.2395)	lr 1.000e-04
+                                      Training metrics: Acc  90.792 ( 90.857)	mAcc  87.544 ( 85.636)	mIoU  80.757 ( 76.435)
+INFO - 10/17/25 20:28:36 - 1:36:36 - Epoch [2-30/60]	ETA [48h13m28s|00h18m02s]	Time [36.073|0.109]	Loss 0.1520 (0.2358)	lr 1.000e-04
+                                      Training metrics: Acc  94.271 ( 90.815)	mAcc  93.718 ( 85.932)	mIoU  84.497 ( 76.412)
+INFO - 10/17/25 20:31:36 - 1:39:36 - Epoch [2-35/60]	ETA [48h02m19s|00h14m59s]	Time [35.967|0.109]	Loss 0.2094 (0.2405)	lr 1.000e-04
+                                      Training metrics: Acc  89.929 ( 90.847)	mAcc  83.515 ( 86.138)	mIoU  75.319 ( 76.636)
+INFO - 10/17/25 20:34:40 - 1:42:40 - Epoch [2-40/60]	ETA [48h02m07s|00h12m00s]	Time [36.003|0.109]	Loss 0.2540 (0.2318)	lr 1.000e-04
+                                      Training metrics: Acc  88.359 ( 91.043)	mAcc  84.652 ( 86.516)	mIoU  76.672 ( 77.054)
+INFO - 10/17/25 20:37:38 - 1:45:38 - Epoch [2-45/60]	ETA [48h07m02s|00h09m01s]	Time [36.106|0.109]	Loss 0.1943 (0.2305)	lr 1.000e-04
+                                      Training metrics: Acc  91.820 ( 91.061)	mAcc  82.247 ( 86.363)	mIoU  76.892 ( 77.104)
+INFO - 10/17/25 20:40:36 - 1:48:36 - Epoch [2-50/60]	ETA [48h00m58s|00h06m00s]	Time [36.066|0.109]	Loss 0.1507 (0.2289)	lr 1.000e-04
+                                      Training metrics: Acc  95.769 ( 91.128)	mAcc  92.095 ( 86.520)	mIoU  82.825 ( 77.086)
+INFO - 10/17/25 20:43:36 - 1:51:36 - Epoch [2-55/60]	ETA [47h50m03s|00h02m59s]	Time [35.964|0.110]	Loss 0.2487 (0.2226)	lr 1.000e-04
+                                      Training metrics: Acc  89.624 ( 91.085)	mAcc  81.725 ( 86.429)	mIoU  74.392 ( 76.923)
+INFO - 10/17/25 20:46:40 - 1:54:41 - Epoch [2-60/60]	ETA [47h50m12s|00h00m00s]	Time [36.005|0.110]	Loss 0.1387 (0.2235)	lr 1.000e-04
+                                      Training metrics: Acc  95.932 ( 90.949)	mAcc  91.968 ( 86.181)	mIoU  87.987 ( 76.632)
+INFO - 10/17/25 20:46:40 - 1:54:41 - ============ Starting epoch 3 ... ============
+INFO - 10/17/25 20:49:37 - 1:57:38 - Epoch [3-5/60]	ETA [47h43m01s|00h32m57s]	Time [35.950|0.109]	Loss 0.2251 (0.2247)	lr 1.000e-04
+                                      Training metrics: Acc  89.196 ( 90.931)	mAcc  89.157 ( 86.101)	mIoU  75.548 ( 76.612)
+INFO - 10/17/25 20:52:41 - 2:00:42 - Epoch [3-10/60]	ETA [47h43m15s|00h29m59s]	Time [35.992|0.109]	Loss 0.1834 (0.2261)	lr 1.000e-04
+                                      Training metrics: Acc  92.455 ( 90.966)	mAcc  87.077 ( 86.145)	mIoU  81.855 ( 76.972)
+INFO - 10/17/25 20:55:39 - 2:03:40 - Epoch [3-15/60]	ETA [47h48m13s|00h27m04s]	Time [36.096|0.109]	Loss 0.1959 (0.2259)	lr 1.000e-04
+                                      Training metrics: Acc  91.798 ( 90.942)	mAcc  86.688 ( 86.173)	mIoU  78.070 ( 77.126)
+INFO - 10/17/25 20:58:37 - 2:06:38 - Epoch [3-20/60]	ETA [47h42m20s|00h24m02s]	Time [36.059|0.110]	Loss 0.1750 (0.2207)	lr 1.000e-04
+                                      Training metrics: Acc  94.595 ( 91.235)	mAcc  91.591 ( 86.632)	mIoU  86.563 ( 77.762)
+INFO - 10/17/25 21:01:38 - 2:09:38 - Epoch [3-25/60]	ETA [47h31m43s|00h20m58s]	Time [35.959|0.110]	Loss 0.3037 (0.2203)	lr 1.000e-04
+                                      Training metrics: Acc  87.629 ( 91.211)	mAcc  84.551 ( 86.937)	mIoU  75.936 ( 77.829)
+INFO - 10/17/25 21:04:42 - 2:12:42 - Epoch [3-30/60]	ETA [47h32m04s|00h18m00s]	Time [36.003|0.111]	Loss 0.1213 (0.2189)	lr 1.000e-04
+                                      Training metrics: Acc  95.882 ( 91.280)	mAcc  93.356 ( 87.098)	mIoU  89.137 ( 77.951)
+INFO - 10/17/25 21:07:40 - 2:15:40 - Epoch [3-35/60]	ETA [47h37m02s|00h15m02s]	Time [36.107|0.111]	Loss 0.2931 (0.2159)	lr 1.000e-04
+                                      Training metrics: Acc  86.811 ( 91.423)	mAcc  79.192 ( 87.368)	mIoU  70.413 ( 78.295)
+INFO - 10/17/25 21:10:38 - 2:18:38 - Epoch [3-40/60]	ETA [47h30m54s|00h12m01s]	Time [36.066|0.111]	Loss 0.1652 (0.2153)	lr 1.000e-04
+                                      Training metrics: Acc  92.784 ( 91.617)	mAcc  88.716 ( 87.764)	mIoU  83.206 ( 78.712)
+INFO - 10/17/25 21:13:38 - 2:21:38 - Epoch [3-45/60]	ETA [47h20m05s|00h08m59s]	Time [35.964|0.111]	Loss 0.2146 (0.2140)	lr 1.000e-04
+                                      Training metrics: Acc  92.529 ( 91.680)	mAcc  87.013 ( 87.838)	mIoU  81.741 ( 78.835)
+INFO - 10/17/25 21:16:42 - 2:24:43 - Epoch [3-50/60]	ETA [47h20m17s|00h06m00s]	Time [36.006|0.112]	Loss 0.2030 (0.2122)	lr 1.000e-04
+                                      Training metrics: Acc  90.911 ( 91.619)	mAcc  90.873 ( 87.780)	mIoU  73.664 ( 78.585)
+INFO - 10/17/25 21:19:40 - 2:27:40 - Epoch [3-55/60]	ETA [47h25m03s|00h03m00s]	Time [36.108|0.110]	Loss 0.1789 (0.2126)	lr 1.000e-04
+                                      Training metrics: Acc  94.043 ( 91.583)	mAcc  90.475 ( 87.727)	mIoU  81.458 ( 78.408)
+INFO - 10/17/25 21:22:38 - 2:30:38 - Epoch [3-60/60]	ETA [47h18m40s|00h00m00s]	Time [36.063|0.110]	Loss 0.1585 (0.2109)	lr 1.000e-04
+                                      Training metrics: Acc  93.441 ( 91.539)	mAcc  88.745 ( 87.672)	mIoU  79.675 ( 78.259)
+INFO - 10/17/25 21:22:38 - 2:30:38 - ============ Starting epoch 4 ... ============
+INFO - 10/17/25 21:25:42 - 2:33:42 - Epoch [4-5/60]	ETA [47h19m42s|00h33m06s]	Time [36.117|0.110]	Loss 0.1353 (0.2079)	lr 1.000e-04
+                                      Training metrics: Acc  95.797 ( 91.644)	mAcc  94.999 ( 87.609)	mIoU  87.927 ( 78.276)
+INFO - 10/17/25 21:28:40 - 2:36:40 - Epoch [4-10/60]	ETA [47h13m34s|00h30m03s]	Time [36.075|0.110]	Loss 0.1327 (0.2054)	lr 1.000e-04
+                                      Training metrics: Acc  95.863 ( 91.810)	mAcc  90.511 ( 87.656)	mIoU  85.936 ( 78.796)
+INFO - 10/17/25 21:31:40 - 2:39:40 - Epoch [4-15/60]	ETA [47h02m43s|00h26m58s]	Time [35.972|0.111]	Loss 0.2073 (0.2050)	lr 1.000e-04
+                                      Training metrics: Acc  91.387 ( 91.968)	mAcc  86.534 ( 87.887)	mIoU  74.884 ( 79.109)
+INFO - 10/17/25 21:34:44 - 2:42:45 - Epoch [4-20/60]	ETA [47h02m34s|00h24m00s]	Time [36.010|0.110]	Loss 0.1481 (0.2050)	lr 1.000e-04
+                                      Training metrics: Acc  94.104 ( 92.041)	mAcc  91.637 ( 87.978)	mIoU  85.867 ( 79.297)
+INFO - 10/17/25 21:37:42 - 2:45:42 - Epoch [4-25/60]	ETA [47h07m14s|00h21m03s]	Time [36.111|0.110]	Loss 0.2353 (0.2013)	lr 1.000e-04
+                                      Training metrics: Acc  90.319 ( 92.081)	mAcc  88.211 ( 88.334)	mIoU  80.176 ( 79.494)
+INFO - 10/17/25 21:40:40 - 2:48:40 - Epoch [4-30/60]	ETA [47h00m53s|00h18m02s]	Time [36.067|0.109]	Loss 0.1173 (0.2053)	lr 1.000e-04
+                                      Training metrics: Acc  96.167 ( 91.951)	mAcc  95.017 ( 88.188)	mIoU  89.923 ( 79.117)
+INFO - 10/17/25 21:43:40 - 2:51:41 - Epoch [4-35/60]	ETA [46h50m07s|00h14m59s]	Time [35.964|0.109]	Loss 0.1709 (0.2087)	lr 1.000e-04
+                                      Training metrics: Acc  94.188 ( 91.823)	mAcc  88.330 ( 88.040)	mIoU  83.590 ( 78.877)
+INFO - 10/17/25 21:46:44 - 2:54:45 - Epoch [4-40/60]	ETA [46h50m30s|00h12m00s]	Time [36.009|0.109]	Loss 0.2679 (0.2101)	lr 1.000e-04
+                                      Training metrics: Acc  88.554 ( 91.950)	mAcc  84.328 ( 88.310)	mIoU  76.602 ( 79.137)
+INFO - 10/17/25 21:49:42 - 2:57:43 - Epoch [4-45/60]	ETA [46h55m08s|00h09m01s]	Time [36.110|0.109]	Loss 0.1985 (0.2106)	lr 1.000e-04
+                                      Training metrics: Acc  94.823 ( 92.109)	mAcc  90.068 ( 88.342)	mIoU  86.222 ( 79.458)
+INFO - 10/17/25 21:52:40 - 3:00:41 - Epoch [4-50/60]	ETA [46h49m04s|00h06m00s]	Time [36.069|0.109]	Loss 0.2232 (0.2112)	lr 1.000e-04
+                                      Training metrics: Acc  89.517 ( 92.117)	mAcc  86.663 ( 88.342)	mIoU  68.554 ( 79.281)
+INFO - 10/17/25 21:55:41 - 3:03:41 - Epoch [4-55/60]	ETA [46h38m24s|00h02m59s]	Time [35.968|0.110]	Loss 0.1685 (0.2138)	lr 1.000e-04
+                                      Training metrics: Acc  93.884 ( 92.068)	mAcc  91.044 ( 88.251)	mIoU  80.396 ( 79.051)
+INFO - 10/17/25 21:58:45 - 3:06:45 - Epoch [4-60/60]	ETA [46h38m47s|00h00m00s]	Time [36.012|0.111]	Loss 0.1370 (0.2082)	lr 1.000e-04
+                                      Training metrics: Acc  95.533 ( 92.020)	mAcc  91.846 ( 88.180)	mIoU  86.785 ( 78.890)
+INFO - 10/17/25 22:10:11 - 3:18:11 - [val] ------- IoU --------
+                                     Not burned	 95.908
+                                     Burn scar 	 68.458
+                                     [val]-------------------
+                                     [val] Mean	 82.183
+INFO - 10/17/25 22:10:11 - 3:18:11 - [val] ------- F1-score --------
+                                     Not burned	 97.911
+                                     Burn scar 	 81.276
+                                     [val]-------------------
+                                     [val] Mean	 89.594
+INFO - 10/17/25 22:10:11 - 3:18:11 - [val] ------- Precision --------
+                                     Not burned	 98.031
+                                     Burn scar 	 80.396
+                                     [val]-------------------
+                                     [val] Mean	 89.213
+INFO - 10/17/25 22:10:11 - 3:18:11 - [val] ------- Recall --------
+                                     Not burned	 97.792
+                                     Burn scar 	 82.176
+                                     [val]-------------------
+                                     [val] Mean	 89.984
+INFO - 10/17/25 22:10:11 - 3:18:11 - Mean Accuracy: 96.242 
+                                     
+INFO - 10/17/25 22:10:12 - 3:18:13 - Epoch 5 | Training checkpoint saved at ..\results\pangaea_pyramid\20251017_185200_bfc2b4_terramind_optical_seg_pyramid_upernet_hlsburnscars\checkpoint__best.pth
+INFO - 10/17/25 22:10:12 - 3:18:13 - ============ Starting epoch 5 ... ============
+INFO - 10/17/25 22:13:10 - 3:21:10 - Epoch [5-5/60]	ETA [47h05m57s|00h32m58s]	Time [35.964|0.113]	Loss 0.1503 (0.2037)	lr 1.000e-04
+                                      Training metrics: Acc  93.965 ( 92.236)	mAcc  90.639 ( 88.162)	mIoU  84.065 ( 79.183)
+INFO - 10/17/25 22:16:14 - 3:24:14 - Epoch [5-10/60]	ETA [47h06m02s|00h30m00s]	Time [36.006|0.113]	Loss 0.2252 (0.2045)	lr 1.000e-04
+                                      Training metrics: Acc  90.926 ( 92.224)	mAcc  84.948 ( 88.157)	mIoU  77.150 ( 79.430)
+INFO - 10/17/25 22:19:12 - 3:27:12 - Epoch [5-15/60]	ETA [47h10m47s|00h27m04s]	Time [36.109|0.113]	Loss 0.2225 (0.2016)	lr 1.000e-04
+                                      Training metrics: Acc  91.743 ( 92.379)	mAcc  87.918 ( 88.438)	mIoU  78.981 ( 79.830)
+INFO - 10/17/25 22:22:10 - 3:30:10 - Epoch [5-20/60]	ETA [47h04m39s|00h24m02s]	Time [36.068|0.113]	Loss 0.1086 (0.2005)	lr 1.000e-04
+                                      Training metrics: Acc  96.097 ( 92.418)	mAcc  94.286 ( 88.519)	mIoU  90.431 ( 79.981)
+INFO - 10/17/25 22:25:10 - 3:33:11 - Epoch [5-25/60]	ETA [46h54m43s|00h20m59s]	Time [35.975|0.114]	Loss 0.2237 (0.2011)	lr 1.000e-04
+                                      Training metrics: Acc  91.050 ( 92.383)	mAcc  89.181 ( 88.714)	mIoU  81.790 ( 79.998)
+INFO - 10/17/25 22:28:15 - 3:36:15 - Epoch [5-30/60]	ETA [46h54m53s|00h18m00s]	Time [36.017|0.114]	Loss 0.1306 (0.1965)	lr 1.000e-04
+                                      Training metrics: Acc  95.097 ( 92.404)	mAcc  95.640 ( 88.728)	mIoU  86.708 ( 79.932)
+INFO - 10/17/25 22:31:12 - 3:39:13 - Epoch [5-35/60]	ETA [46h59m31s|00h15m02s]	Time [36.120|0.113]	Loss 0.1902 (0.1935)	lr 1.000e-04
+                                      Training metrics: Acc  93.078 ( 92.383)	mAcc  89.177 ( 88.783)	mIoU  83.758 ( 80.052)
+INFO - 10/17/25 22:34:10 - 3:42:11 - Epoch [5-40/60]	ETA [46h53m13s|00h12m01s]	Time [36.075|0.114]	Loss 0.1327 (0.1906)	lr 1.000e-04
+                                      Training metrics: Acc  95.431 ( 92.580)	mAcc  94.068 ( 89.082)	mIoU  90.255 ( 80.472)
+INFO - 10/17/25 22:37:11 - 3:45:11 - Epoch [5-45/60]	ETA [46h42m49s|00h08m59s]	Time [35.976|0.116]	Loss 0.1365 (0.1892)	lr 1.000e-04
+                                      Training metrics: Acc  95.322 ( 92.632)	mAcc  90.667 ( 89.148)	mIoU  87.230 ( 80.656)
+INFO - 10/17/25 22:40:15 - 3:48:15 - Epoch [5-50/60]	ETA [46h42m46s|00h06m00s]	Time [36.016|0.116]	Loss 0.1357 (0.1865)	lr 1.000e-04
+                                      Training metrics: Acc  95.117 ( 92.628)	mAcc  93.146 ( 89.093)	mIoU  83.489 ( 80.473)
+INFO - 10/17/25 22:43:13 - 3:51:13 - Epoch [5-55/60]	ETA [46h47m21s|00h03m00s]	Time [36.118|0.114]	Loss 0.2247 (0.1821)	lr 1.000e-04
+                                      Training metrics: Acc  92.078 ( 92.641)	mAcc  83.288 ( 89.031)	mIoU  76.663 ( 80.424)
+INFO - 10/17/25 22:46:11 - 3:54:11 - Epoch [5-60/60]	ETA [46h41m14s|00h00m00s]	Time [36.076|0.114]	Loss 0.1276 (0.1838)	lr 1.000e-04
+                                      Training metrics: Acc  95.276 ( 92.590)	mAcc  92.415 ( 88.954)	mIoU  85.608 ( 80.311)
+INFO - 10/17/25 22:46:11 - 3:54:11 - ============ Starting epoch 6 ... ============
+INFO - 10/17/25 22:49:15 - 3:57:15 - Epoch [6-5/60]	ETA [46h41m51s|00h33m06s]	Time [36.125|0.112]	Loss 0.1953 (0.1896)	lr 1.000e-04
+                                      Training metrics: Acc  91.286 ( 92.588)	mAcc  91.848 ( 88.903)	mIoU  80.373 ( 80.258)
+INFO - 10/17/25 22:52:13 - 4:00:13 - Epoch [6-10/60]	ETA [46h35m42s|00h30m04s]	Time [36.083|0.111]	Loss 0.1305 (0.1845)	lr 1.000e-04
+                                      Training metrics: Acc  95.738 ( 92.889)	mAcc  93.508 ( 89.334)	mIoU  88.464 ( 81.211)
+INFO - 10/17/25 22:55:13 - 4:03:13 - Epoch [6-15/60]	ETA [46h25m00s|00h26m59s]	Time [35.978|0.111]	Loss 0.1626 (0.1857)	lr 1.000e-04
+                                      Training metrics: Acc  94.042 ( 93.074)	mAcc  90.349 ( 89.598)	mIoU  83.081 ( 81.666)
+INFO - 10/17/25 22:58:17 - 4:06:17 - Epoch [6-20/60]	ETA [46h25m04s|00h24m00s]	Time [36.020|0.111]	Loss 0.1122 (0.1855)	lr 1.000e-04
+                                      Training metrics: Acc  96.338 ( 93.157)	mAcc  94.456 ( 89.696)	mIoU  90.265 ( 81.877)
+INFO - 10/17/25 23:01:15 - 4:09:15 - Epoch [6-25/60]	ETA [46h29m01s|00h21m04s]	Time [36.114|0.111]	Loss 0.1913 (0.1798)	lr 1.000e-04
+                                      Training metrics: Acc  92.186 ( 93.179)	mAcc  90.013 ( 89.994)	mIoU  83.373 ( 82.027)
+INFO - 10/17/25 23:04:13 - 4:12:13 - Epoch [6-30/60]	ETA [46h22m54s|00h18m02s]	Time [36.072|0.112]	Loss 0.1575 (0.1802)	lr 1.000e-04
+                                      Training metrics: Acc  92.866 ( 93.168)	mAcc  92.733 ( 90.164)	mIoU  82.804 ( 81.939)
+INFO - 10/17/25 23:07:13 - 4:15:13 - Epoch [6-35/60]	ETA [46h12m20s|00h14m59s]	Time [35.969|0.111]	Loss 0.2527 (0.1808)	lr 1.000e-04
+                                      Training metrics: Acc  89.829 ( 93.178)	mAcc  83.545 ( 90.169)	mIoU  76.715 ( 82.085)
+INFO - 10/17/25 23:10:16 - 4:18:16 - Epoch [6-40/60]	ETA [46h11m28s|00h11m59s]	Time [35.998|0.111]	Loss 0.2153 (0.1804)	lr 1.000e-04
+                                      Training metrics: Acc  90.317 ( 93.200)	mAcc  87.648 ( 90.186)	mIoU  80.485 ( 82.191)
+INFO - 10/17/25 23:13:11 - 4:21:11 - Epoch [6-45/60]	ETA [46h12m23s|00h09m00s]	Time [36.052|0.109]	Loss 0.1736 (0.1825)	lr 1.000e-04
+                                      Training metrics: Acc  94.346 ( 93.058)	mAcc  90.636 ( 90.005)	mIoU  86.124 ( 81.989)
+INFO - 10/17/25 23:16:06 - 4:24:07 - Epoch [6-50/60]	ETA [46h03m11s|00h05m59s]	Time [35.967|0.110]	Loss 0.1959 (0.1869)	lr 1.000e-04
+                                      Training metrics: Acc  91.732 ( 92.958)	mAcc  89.088 ( 89.889)	mIoU  73.560 ( 81.594)
+INFO - 10/17/25 23:19:04 - 4:27:04 - Epoch [6-55/60]	ETA [45h49m28s|00h02m59s]	Time [35.820|0.111]	Loss 0.1732 (0.1912)	lr 1.000e-04
+                                      Training metrics: Acc  93.131 ( 92.811)	mAcc  85.024 ( 89.532)	mIoU  78.547 ( 81.101)
+INFO - 10/17/25 23:22:05 - 4:30:05 - Epoch [6-60/60]	ETA [45h45m56s|00h00m00s]	Time [35.813|0.110]	Loss 0.0877 (0.1916)	lr 1.000e-04
+                                      Training metrics: Acc  98.385 ( 92.767)	mAcc  97.046 ( 89.479)	mIoU  94.841 ( 81.037)
+INFO - 10/17/25 23:22:05 - 4:30:05 - ============ Starting epoch 7 ... ============
+INFO - 10/17/25 23:24:59 - 4:33:00 - Epoch [7-5/60]	ETA [45h35m41s|00h32m44s]	Time [35.713|0.110]	Loss 0.2259 (0.1940)	lr 1.000e-04
+                                      Training metrics: Acc  88.185 ( 92.639)	mAcc  90.133 ( 89.256)	mIoU  74.705 ( 80.715)
+INFO - 10/17/25 23:28:01 - 4:36:01 - Epoch [7-10/60]	ETA [45h32m33s|00h29m45s]	Time [35.711|0.112]	Loss 0.1296 (0.1963)	lr 1.000e-04
+                                      Training metrics: Acc  94.666 ( 92.731)	mAcc  92.763 ( 89.418)	mIoU  85.223 ( 81.163)
+INFO - 10/17/25 23:30:56 - 4:38:56 - Epoch [7-15/60]	ETA [45h33m54s|00h26m49s]	Time [35.770|0.112]	Loss 0.1563 (0.1957)	lr 1.000e-04
+                                      Training metrics: Acc  93.190 ( 92.832)	mAcc  89.747 ( 89.478)	mIoU  80.422 ( 81.372)
+INFO - 10/17/25 23:33:51 - 4:41:52 - Epoch [7-20/60]	ETA [45h24m38s|00h23m47s]	Time [35.684|0.112]	Loss 0.2553 (0.1993)	lr 1.000e-04
+                                      Training metrics: Acc  88.377 ( 92.728)	mAcc  83.392 ( 89.331)	mIoU  75.108 ( 81.241)
+INFO - 10/17/25 23:36:49 - 4:44:49 - Epoch [7-25/60]	ETA [45h10m48s|00h20m43s]	Time [35.534|0.112]	Loss 0.2298 (0.2001)	lr 1.000e-04
+                                      Training metrics: Acc  91.535 ( 92.719)	mAcc  90.859 ( 89.500)	mIoU  83.352 ( 81.346)
+INFO - 10/17/25 23:39:50 - 4:47:51 - Epoch [7-30/60]	ETA [45h07m35s|00h17m45s]	Time [35.531|0.112]	Loss 0.1019 (0.2024)	lr 1.000e-04
+                                      Training metrics: Acc  96.265 ( 92.573)	mAcc  96.767 ( 89.608)	mIoU  88.577 ( 80.960)
+INFO - 10/17/25 23:42:45 - 4:50:45 - Epoch [7-35/60]	ETA [45h08m38s|00h14m49s]	Time [35.586|0.112]	Loss 0.1691 (0.1999)	lr 1.000e-04
+                                      Training metrics: Acc  92.595 ( 92.534)	mAcc  87.992 ( 89.649)	mIoU  82.479 ( 80.953)
+INFO - 10/17/25 23:45:41 - 4:53:41 - Epoch [7-40/60]	ETA [45h00m30s|00h11m50s]	Time [35.515|0.112]	Loss 0.3102 (0.2008)	lr 1.000e-04
+                                      Training metrics: Acc  90.038 ( 92.619)	mAcc  86.802 ( 89.816)	mIoU  79.726 ( 81.139)
+INFO - 10/17/25 23:48:38 - 4:56:39 - Epoch [7-45/60]	ETA [44h50m30s|00h08m51s]	Time [35.417|0.114]	Loss 0.2173 (0.1961)	lr 1.000e-04
+                                      Training metrics: Acc  92.690 ( 92.790)	mAcc  87.485 ( 89.860)	mIoU  81.927 ( 81.447)
+INFO - 10/17/25 23:51:41 - 4:59:41 - Epoch [7-50/60]	ETA [44h51m56s|00h05m54s]	Time [35.478|0.125]	Loss 0.1874 (0.1920)	lr 1.000e-04
+                                      Training metrics: Acc  91.270 ( 92.663)	mAcc  91.136 ( 89.624)	mIoU  75.366 ( 80.954)
+INFO - 10/17/25 23:54:37 - 5:02:37 - Epoch [7-55/60]	ETA [44h56m54s|00h02m57s]	Time [35.588|0.134]	Loss 0.2136 (0.1869)	lr 1.000e-04
+                                      Training metrics: Acc  91.705 ( 92.631)	mAcc  83.237 ( 89.516)	mIoU  76.726 ( 80.730)

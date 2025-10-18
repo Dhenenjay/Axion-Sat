@@ -1,0 +1,137 @@
+INFO - 10/17/25 14:37:25 - 0:00:00 - ============ Initialized logger ============
+INFO - 10/17/25 14:37:25 - 0:00:00 - 'batch_size': 8,
+                                      'ckpt_dir': None,
+                                      'criterion': {'_target_': 'torch.nn.CrossEntropyLoss',
+                                                    'ignore_index': '${dataset.ignore_index}'},
+                                      'data_replicate': 1,
+                                      'dataset': {'_target_': 'pangaea.datasets.hlsburnscars.HLSBurnScars',
+                                                  'auto_download': True,
+                                                  'bands': {'optical': ['B2', 'B3', 'B4', 'B8A', 'B11', 'B12']},
+                                                  'classes': ['Not burned', 'Burn scar'],
+                                                  'data_max': {'optical': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]},
+                                                  'data_mean': {'optical': [0.033349706741586264,
+                                                                            0.05701185520536176, 0.05889748132001316,
+                                                                            0.2323245113436119, 0.1972854853760658,
+                                                                            0.11944914225186566]},
+                                                  'data_min': {'optical': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]},
+                                                  'data_std': {'optical': [0.02269135568823774, 0.026807560223070237,
+                                                                           0.04004109844362779, 0.07791732423672691,
+                                                                           0.08708738838140137,
+                                                                           0.07241979477437814]},
+                                                  'dataset_name': 'HLSBurnScars',
+                                                  'distribution': [0.88889, 0.11111],
+                                                  'download_url': 'https://huggingface.co/datasets/ibm-nasa-geospatial/hls_burn_scars/resolve/main/hls_burn_scars.tar.gz?download=true',
+                                                  'ignore_index': -1,
+                                                  'img_size': 512,
+                                                  'multi_modal': False,
+                                                  'multi_temporal': False,
+                                                  'num_classes': 2,
+                                                  'root_path': './data/hlsburnscars'},
+                                      'decoder': {'_target_': 'pangaea.decoders.upernet.SegUPerNet',
+                                                  'channels': 512,
+                                                  'encoder': None,
+                                                  'finetune': '${finetune}',
+                                                  'num_classes': '${dataset.num_classes}'},
+                                      'encoder': {'_target_': 'pangaea.encoders.terramind_encoder.terramind_v1_large',
+                                                  'download_url': None,
+                                                  'encoder_weights': 'C:\\Users\\Dhenenjay\\Axion-Sat\\weights\\hf\\TerraMind-1.0-large\\TerraMind_v1_large.pt',
+                                                  'input_bands': {'optical': ['B1', 'B2', 'B3', 'B4', 'B5', 'B6',
+                                                                              'B7', 'B8', 'B8A', 'B10', 'B11',
+                                                                              'B12']},
+                                                  'input_size': 224,
+                                                  'merge_method': 'mean',
+                                                  'modalities': ['S2L2A'],
+                                                  'output_dim': 1024,
+                                                  'output_layers': [7, 11, 15, 23],
+                                                  'patch_size': 16},
+                                      'finetune': False,
+                                      'limited_label_strategy': 'stratified',
+                                      'limited_label_train': 1,
+                                      'limited_label_val': 1,
+                                      'lr_scheduler': {'_target_': 'pangaea.utils.schedulers.MultiStepLR',
+                                                       'lr_milestones': [0.6, 0.9],
+                                                       'optimizer': None,
+                                                       'total_iters': None},
+                                      'num_workers': 0,
+                                      'optimizer': {'_target_': 'torch.optim.AdamW',
+                                                    'betas': [0.9, 0.999],
+                                                    'lr': 0.0001,
+                                                    'params': None,
+                                                    'weight_decay': 0.05},
+                                      'preprocessing': {'test': {'_target_': 'pangaea.engine.data_preprocessor.Preprocessor',
+                                                                 'preprocessor_cfg': [{'_target_': 'pangaea.engine.data_preprocessor.BandFilter'},
+                                                                                      {'_target_': 'pangaea.engine.data_preprocessor.NormalizeMeanStd'},
+                                                                                      {'_target_': 'pangaea.engine.data_preprocessor.BandPadding'}]},
+                                                        'train': {'_target_': 'pangaea.engine.data_preprocessor.Preprocessor',
+                                                                  'preprocessor_cfg': [{'_target_': 'pangaea.engine.data_preprocessor.RandomCropToEncoder'},
+                                                                                       {'_target_': 'pangaea.engine.data_preprocessor.BandFilter'},
+                                                                                       {'_target_': 'pangaea.engine.data_preprocessor.NormalizeMeanStd'},
+                                                                                       {'_target_': 'pangaea.engine.data_preprocessor.BandPadding'}]},
+                                                        'val': {'_target_': 'pangaea.engine.data_preprocessor.Preprocessor',
+                                                                'preprocessor_cfg': [{'_target_': 'pangaea.engine.data_preprocessor.BandFilter'},
+                                                                                     {'_target_': 'pangaea.engine.data_preprocessor.NormalizeMeanStd'},
+                                                                                     {'_target_': 'pangaea.engine.data_preprocessor.BandPadding'}]}},
+                                      'seed': 234,
+                                      'stratification_bins': 3,
+                                      'task': {'evaluator': {'_target_': 'pangaea.engine.evaluator.SegEvaluator',
+                                                             'device': None,
+                                                             'exp_dir': None,
+                                                             'inference_mode': 'sliding',
+                                                             'sliding_inference_batch': 8,
+                                                             'use_wandb': '${use_wandb}',
+                                                             'val_loader': None},
+                                               'trainer': {'_target_': 'pangaea.engine.trainer.SegTrainer',
+                                                           'best_metric_key': 'mIoU',
+                                                           'ckpt_interval': 20,
+                                                           'criterion': None,
+                                                           'device': None,
+                                                           'eval_interval': 5,
+                                                           'evaluator': None,
+                                                           'exp_dir': None,
+                                                           'log_interval': 5,
+                                                           'lr_scheduler': None,
+                                                           'model': None,
+                                                           'n_epochs': 80,
+                                                           'optimizer': None,
+                                                           'precision': 'fp32',
+                                                           'train_loader': None,
+                                                           'use_wandb': '${use_wandb}'}},
+                                      'test_batch_size': 1,
+                                      'test_num_workers': 0,
+                                      'train': True,
+                                      'use_final_ckpt': False,
+                                      'use_multiscale': False,
+                                      'use_tta': False,
+                                      'use_wandb': False,
+                                      'wandb_run_id': None,
+                                      'work_dir': '../results/pangaea_final'
+INFO - 10/17/25 14:37:25 - 0:00:00 - The experiment is stored in ..\results\pangaea_final\20251017_131022_c3d2a2_terramind_optical_seg_upernet_hlsburnscars
+                                     
+INFO - 10/17/25 14:37:25 - 0:00:00 - Device used: cuda:0
+INFO - 10/17/25 14:37:26 - 0:00:01 - A new version of Albumentations is available: 2.0.8 (you have 1.4.10). Upgrade using: pip install --upgrade albumentations
+WARNING - 10/17/25 14:37:31 - 0:00:06 - Missing keys in encoder_weights C:\Users\Dhenenjay\Axion-Sat\weights\hf\TerraMind-1.0-large\TerraMind_v1_large.pt: []
+INFO - 10/17/25 14:37:31 - 0:00:06 - Built terramind.
+INFO - 10/17/25 14:37:32 - 0:00:07 - Built UPerNet for with TerraMindViT encoder.
+INFO - 10/17/25 14:37:34 - 0:00:09 - Loaded checkpoint__best for evaluation
+INFO - 10/17/25 14:39:56 - 0:02:30 - [test] ------- IoU --------
+                                     Not burned	 96.488
+                                     Burn scar 	 70.313
+                                     [test]-------------------
+                                     [test] Mean	 83.400
+INFO - 10/17/25 14:39:56 - 0:02:30 - [test] ------- F1-score --------
+                                     Not burned	 98.213
+                                     Burn scar 	 82.569
+                                     [test]-------------------
+                                     [test] Mean	 90.391
+INFO - 10/17/25 14:39:56 - 0:02:30 - [test] ------- Precision --------
+                                     Not burned	 98.165
+                                     Burn scar 	 82.965
+                                     [test]-------------------
+                                     [test] Mean	 90.565
+INFO - 10/17/25 14:39:56 - 0:02:30 - [test] ------- Recall --------
+                                     Not burned	 98.261
+                                     Burn scar 	 82.177
+                                     [test]-------------------
+                                     [test] Mean	 90.219
+INFO - 10/17/25 14:39:56 - 0:02:30 - Mean Accuracy: 96.758 
+                                     
